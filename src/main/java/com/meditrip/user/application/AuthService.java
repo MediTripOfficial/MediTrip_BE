@@ -82,6 +82,8 @@ public class AuthService {
             return;
         }
 
+        underlyingDisease = underlyingDisease.stream().map(String::toLowerCase).toList();
+
         List<Condition> existingConditions = conditionRepository.findAllByNameIn(underlyingDisease);
         Set<String> existingNames = existingConditions.stream()
                 .map(Condition::getName)
@@ -114,6 +116,8 @@ public class AuthService {
         if (allergies == null || allergies.isEmpty()) {
             return;
         }
+
+        allergies = allergies.stream().map(String::toLowerCase).toList();
 
         List<Allergy> existingAllergies = allergyRepository.findAllByNameIn(allergies);
         Set<String> existingNames = existingAllergies.stream()
