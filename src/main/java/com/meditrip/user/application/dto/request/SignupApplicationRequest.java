@@ -26,5 +26,6 @@ public class SignupApplicationRequest {
     private List<String> allergies;
     private boolean isMarketingTermsAgreed;
     private UUID verifiedToken;
+    private String profileImg;
 
 }

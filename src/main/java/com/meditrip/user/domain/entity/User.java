@@ -64,7 +64,7 @@ public class User extends BaseEntity {
 
     public static User createLocalUser(UUID id, String email, String encodedPassword, String password, String name, String nickname,
                                        Double weight, Double height, LocalDate birth, Gender gender, String country,
-                                       Boolean isMarketingTermsAgreed) {
+                                       Boolean isMarketingTermsAgreed, String profileImg) {
         validateName(id, name);
         validatePassword(id, password);
         validateBirth(id, birth);
@@ -84,6 +84,7 @@ public class User extends BaseEntity {
                 .isMarketingTermsAgreed(isMarketingTermsAgreed)
                 .provider(Provider.LOCAL)
                 .status(UserStatus.ACTIVE)
+                .profileImg(profileImg)
                 .build();
     }
 

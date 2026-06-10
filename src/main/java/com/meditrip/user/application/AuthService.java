@@ -47,7 +47,7 @@ public class AuthService {
 
         User user = User.createLocalUser(userId, request.getEmail(), encodePassword, request.getPassword(),
                 request.getName(), request.getNickname(), request.getWeight(), request.getHeight(), request.getBirth(),
-                request.getGender(), request.getCountry(), request.isMarketingTermsAgreed());
+                request.getGender(), request.getCountry(), request.isMarketingTermsAgreed(), request.getProfileImg());
 
         User saved = userRepository.save(user);
 

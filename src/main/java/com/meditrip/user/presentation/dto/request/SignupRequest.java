@@ -60,6 +60,7 @@ public class SignupRequest {
     private List<String> underlyingDisease;
     private List<String> allergies;
     private boolean isMarketingTermsAgreed;
+    private String profileImg;
     private String verifiedToken;
 
     public SignupApplicationRequest toApplicationRequest() {
@@ -77,6 +78,7 @@ public class SignupRequest {
                 .allergies(this.allergies)
                 .isMarketingTermsAgreed(this.isMarketingTermsAgreed)
                 .verifiedToken(UUID.fromString(this.verifiedToken))
+                .profileImg(this.profileImg)
                 .build();
     }
 }
