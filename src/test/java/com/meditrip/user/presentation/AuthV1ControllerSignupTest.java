@@ -450,10 +450,10 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
     @Test
     void shouldNotSaveCondition_whenConditionAlreadyExists() throws Exception {
         //given
-        conditionRepository.save(Condition.create("DIABETES"));
+        conditionRepository.save(Condition.create("diabetes"));
 
         SignupRequest signupRequest = createValidSignupRequest().toBuilder()
-                .underlyingDisease(List.of("DIABETES"))
+                .underlyingDisease(List.of("diabetes"))
                 .build();
 
         //when
@@ -490,10 +490,10 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
     @Test
     void shouldSaveOnlyNewConditions_whenSomeConditionsAlreadyExist() throws Exception {
         //given
-        conditionRepository.save(Condition.create("DIABETES"));
+        conditionRepository.save(Condition.create("diabetes"));
 
         SignupRequest signupRequest = createValidSignupRequest().toBuilder()
-                .underlyingDisease(List.of("DIABETES", "ASTHMA"))
+                .underlyingDisease(List.of("diabetes", "ASTHMA"))
                 .build();
 
         //when
@@ -530,10 +530,10 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
     @Test
     void shouldNotSaveAllergy_whenAllergyAlreadyExists() throws Exception {
         //given
-        allergyRepository.save(Allergy.create("Milk"));
+        allergyRepository.save(Allergy.create("milk"));
 
         SignupRequest signupRequest = createValidSignupRequest().toBuilder()
-                .allergies(List.of("Milk"))
+                .allergies(List.of("milk"))
                 .build();
 
         //when
@@ -589,10 +589,10 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
     @Test
     void shouldSaveOnlyNewAllergies_whenSomeAllergiesAlreadyExist() throws Exception {
         //given
-        allergyRepository.save(Allergy.create("Milk")); // 기존에 존재
+        allergyRepository.save(Allergy.create("milk"));
 
         SignupRequest signupRequest = createValidSignupRequest().toBuilder()
-                .allergies(List.of("Milk", "Eggs")) // Eggs는 신규
+                .allergies(List.of("milk", "eggs"))
                 .build();
 
         //when

@@ -207,7 +207,7 @@ class AuthServiceSignupTest {
     void shouldNotSaveConditions_whenAllConditionsAlreadyExist() {
         //given
         Condition existingCondition = mock(Condition.class);
-        given(existingCondition.getName()).willReturn("NONE");
+        given(existingCondition.getName()).willReturn("none");
         given(existingCondition.getId()).willReturn(1L);
 
         SignupApplicationRequest request = createSignupApplicationRequest();
@@ -358,7 +358,7 @@ class AuthServiceSignupTest {
         given(savedCondition.getId()).willReturn(1L);
 
         Allergy existingAllergy = mock(Allergy.class);
-        given(existingAllergy.getName()).willReturn("Milk");
+        given(existingAllergy.getName()).willReturn("milk");
         given(existingAllergy.getId()).willReturn(1L);
 
         SignupApplicationRequest request = SignupApplicationRequest.builder()
@@ -372,7 +372,7 @@ class AuthServiceSignupTest {
                 .gender(Gender.F)
                 .country("KR")
                 .underlyingDisease(List.of("NONE"))
-                .allergies(List.of("Milk"))
+                .allergies(List.of("milk"))
                 .isMarketingTermsAgreed(true)
                 .build();
 
@@ -486,7 +486,7 @@ class AuthServiceSignupTest {
                 .birth(LocalDate.of(2002, 5, 5))
                 .gender(Gender.F)
                 .country("KR")
-                .underlyingDisease(List.of("NONE"))
+                .underlyingDisease(List.of("none"))
                 .allergies(null)
                 .isMarketingTermsAgreed(true)
                 .build();

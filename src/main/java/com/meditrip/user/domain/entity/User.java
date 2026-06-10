@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
 
 @Entity
 @Table(name = "users")
@@ -130,6 +131,14 @@ public class User extends BaseEntity {
             log.warn("유효한 비밀번호 형식이 아닙니다. User Id : [{}]", id);
             throw new IllegalArgumentException(
                     "Password must be 8–20 characters and include a letter, number, and special character.");
+        }
+    }
+
+    public void validateStatus() {
+        switch (this.status) {
+            case WITHDRAWN, DELETED -> throw new BadCredentialsException("Incorrect email or password.");
+            default -> {
+            }
         }
     }
 
