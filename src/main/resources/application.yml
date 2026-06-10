@@ -2,3 +2,36 @@ spring:
   application:
     name: meditrip
 
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        highlight_sql: true
+      hibernate.type.preferred_uuid_jdbc_type: CHAR
+      logging:
+        level:
+          org.hibernate.SQL: debug
+          org.hibernate.orm.schema: debug
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration: 3600000 # 1시간 (1000 * 60 * 60)
+  refresh-token-expiration: 604800000 # 7일 (1000 * 60 * 60 * 24 * 7)
+  token-type-claim: "token_type"
+  access-token-type: "access"
+  refresh-token-type: "refresh"
+  redis-prefix-refresh: "mediTrip:refreshToken:"
