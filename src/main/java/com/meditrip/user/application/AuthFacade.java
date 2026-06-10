@@ -56,4 +56,8 @@ public class AuthFacade {
                 .build();
     }
 
+    public void logout(UUID userId) {
+        tokenService.deleteRefreshToken(userId);
+    }
+
 }
