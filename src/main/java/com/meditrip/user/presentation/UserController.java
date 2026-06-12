@@ -1,8 +1,12 @@
 package com.meditrip.user.presentation;
 
+import com.meditrip.common.jwt.CustomUserDetails;
 import com.meditrip.user.application.UserService;
+import com.meditrip.user.application.dto.response.UserInfoResponse;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,6 +37,11 @@ public class UserController {
 
         userService.checkNicknameDuplication(nickname);
         return ResponseEntity.ok( "사용 가능");
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserInfoResponse> getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(userService.getUserInfo(UUID.fromString(userDetails.getUserId())));
     }
 
 }

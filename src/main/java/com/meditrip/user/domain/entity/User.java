@@ -1,6 +1,7 @@
 package com.meditrip.user.domain.entity;
 
 import com.meditrip.common.domain.BaseEntity;
+import com.meditrip.common.exception.NotFoundException;
 import com.meditrip.user.domain.entity.enums.Gender;
 import com.meditrip.user.domain.entity.enums.Provider;
 import com.meditrip.user.domain.entity.enums.UserStatus;
@@ -134,9 +135,17 @@ public class User extends BaseEntity {
         }
     }
 
-    public void validateStatus() {
+    public void validateStatusForLogin() {
         switch (this.status) {
             case WITHDRAWN, DELETED -> throw new BadCredentialsException("Incorrect email or password.");
+            default -> {
+            }
+        }
+    }
+
+    public void validateStatus() {
+        switch (this.status) {
+            case WITHDRAWN, DELETED -> throw new NotFoundException("User Not Found");
             default -> {
             }
         }

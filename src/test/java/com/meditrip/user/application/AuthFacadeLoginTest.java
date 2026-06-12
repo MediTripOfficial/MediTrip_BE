@@ -68,7 +68,7 @@ class AuthFacadeLoginTest {
         assertThat(response.getAccessToken()).isEqualTo(accessToken);
         assertThat(response.getRefreshToken()).isEqualTo(refreshToken);
 
-        verify(user, times(1)).validateStatus();
+        verify(user, times(1)).validateStatusForLogin();
         verify(authService, times(1)).verifyPassword(eq("password1234"), eq("storedPassword"));
         verify(tokenService, times(1)).saveRefreshToken(eq(userId), eq(refreshToken));
     }
@@ -126,7 +126,7 @@ class AuthFacadeLoginTest {
 
         given(userService.findLoginUserByEmail(eq("로그인"), eq(email))).willReturn(user);
         doThrow(new BadCredentialsException("Incorrect email or password."))
-                .when(user).validateStatus();
+                .when(user).validateStatusForLogin();
 
         LoginApplicationRequest request = LoginApplicationRequest.builder()
                 .email(email)
