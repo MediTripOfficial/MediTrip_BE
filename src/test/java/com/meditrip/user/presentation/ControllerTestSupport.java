@@ -43,4 +43,8 @@ public class ControllerTestSupport {
                 .build();
     }
 
+    protected User createUser(UUID userId, String email, UserStatus userStatus) {
+        return createUser(userId, email, "password123!", userStatus);
+    }
+
 }
