@@ -43,7 +43,7 @@ public class AuthFacade {
 
         User user = userService.findLoginUserByEmail("로그인", request.getEmail());
         user.validateStatusForLogin();
-        authService.verifyPassword(request.getPassword(), user.getPassword());
+        authService.verifyPasswordForLogin(request.getPassword(), user.getPassword());
 
         String accessToken = jwtProvider.generateAccessToken(user.getId().toString());
         String refreshToken = jwtProvider.generateRefreshToken(user.getId().toString());

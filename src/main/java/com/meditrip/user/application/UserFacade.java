@@ -1,6 +1,7 @@
 package com.meditrip.user.application;
 
 import com.meditrip.user.application.dto.request.UpdateUserInfoApplicationRequest;
+import com.meditrip.user.application.dto.request.WithdrawnApplicationRequest;
 import com.meditrip.user.application.dto.response.UserInfoResponse;
 import com.meditrip.user.domain.entity.User;
 import java.util.UUID;
@@ -35,6 +36,17 @@ public class UserFacade {
         authService.saveConditions(request.getUnderlyingDisease(), userId);
 
         return userService.getUserInfo(userId);
+    }
+
+    @Transactional
+    public void deleteUser(UUID userId, WithdrawnApplicationRequest request) {
+        log.info("유저 탈퇴 요청. User Id : [{}]", userId);
+        User user = userService.findById(userId, "탈퇴");
+        user.validateStatus();
+
+        authService.verifyPassword(request.getPassword(), user.getPassword());
+
+        user.withdrawn();
     }
 
 }

@@ -36,7 +36,7 @@ class AuthServicePasswordTest {
         given(passwordEncoder.matches(inputPassword, storedPassword)).willReturn(true);
 
         //when, then
-        assertDoesNotThrow(() -> authService.verifyPassword(inputPassword, storedPassword));
+        assertDoesNotThrow(() -> authService.verifyPasswordForLogin(inputPassword, storedPassword));
     }
 
     @DisplayName("비밀번호가 일치하지 않으면 예외가 발생한다.")
@@ -49,7 +49,7 @@ class AuthServicePasswordTest {
         given(passwordEncoder.matches(inputPassword, storedPassword)).willReturn(false);
 
         //when, then
-        assertThatThrownBy(() -> authService.verifyPassword(inputPassword, storedPassword))
+        assertThatThrownBy(() -> authService.verifyPasswordForLogin(inputPassword, storedPassword))
                 .isInstanceOf(BadCredentialsException.class)
                 .hasMessage("Incorrect email or password.");
     }

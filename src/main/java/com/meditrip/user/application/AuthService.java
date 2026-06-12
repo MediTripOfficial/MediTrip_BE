@@ -147,9 +147,15 @@ public class AuthService {
         userAllergyRepository.saveAll(userAllergy);
     }
 
-    public void verifyPassword(String inputPassword, String storedPassword) {
+    public void verifyPasswordForLogin(String inputPassword, String storedPassword) {
         if (!passwordEncoder.matches(inputPassword, storedPassword)) {
             throw new BadCredentialsException("Incorrect email or password.");
+        }
+    }
+
+    public void verifyPassword(String inputPassword, String storedPassword) {
+        if (!passwordEncoder.matches(inputPassword, storedPassword)) {
+            throw new IllegalArgumentException("Passwords do not match");
         }
     }
 
