@@ -74,4 +74,21 @@ public class UserService {
                 });
     }
 
+    @Transactional
+    public void deleteAllergyAndConditions(UUID userId) {
+        userConditionRepository.deleteAllByUserId(userId);
+        userAllergyRepository.deleteAllByUserId(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public void validUpdateUser(String nickname) {
+        userRepository.findByNickname(nickname).ifPresent(user -> {
+            UserStatus status = user.getStatus();
+
+            if (status != UserStatus.DELETED && status != UserStatus.WITHDRAWN) {
+                throw new DuplicateKeyException("Nickname already exists.");
+            }
+        });
+    }
+
 }

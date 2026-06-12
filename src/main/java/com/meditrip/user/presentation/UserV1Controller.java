@@ -1,13 +1,18 @@
 package com.meditrip.user.presentation;
 
 import com.meditrip.common.jwt.CustomUserDetails;
+import com.meditrip.user.application.UserFacade;
 import com.meditrip.user.application.UserService;
 import com.meditrip.user.application.dto.response.UserInfoResponse;
+import com.meditrip.user.presentation.dto.request.UpdateUserInfoRequest;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,9 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
-public class UserController {
+public class UserV1Controller {
 
     private final UserService userService;
+    private final UserFacade userFacade;
 
     @GetMapping("/email/check")
     public ResponseEntity<String> checkEmailDuplication(@RequestParam(required = false) String email) {
@@ -42,6 +48,12 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserInfoResponse> getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(userService.getUserInfo(UUID.fromString(userDetails.getUserId())));
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserInfoResponse> updateUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                        @Valid @RequestBody UpdateUserInfoRequest request) {
+        return ResponseEntity.ok(userFacade.updateUserInfo(UUID.fromString(userDetails.getUserId()), request.toApplicationRequest()));
     }
 
 }

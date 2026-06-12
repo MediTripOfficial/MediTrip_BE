@@ -17,4 +17,6 @@ public interface UserConditionRepository extends JpaRepository<UserCondition, Lo
             """)
     List<String> findConditionNamesByUserId(UUID userId);
 
+    void deleteAllByUserId(UUID userId);
+
 }

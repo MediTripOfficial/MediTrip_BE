@@ -58,7 +58,6 @@ public class AuthService {
         return saved.getId();
     }
 
-
     private void validSignUp(SignupApplicationRequest request) {
         userRepository.findByEmail(request.getEmail()).ifPresent(user -> {
             UserStatus status = user.getStatus();
@@ -78,7 +77,7 @@ public class AuthService {
         });
     }
 
-    private void saveConditions(List<String> underlyingDisease, UUID userId) {
+    protected void saveConditions(List<String> underlyingDisease, UUID userId) {
         if (underlyingDisease == null || underlyingDisease.isEmpty()) {
             return;
         }
@@ -113,7 +112,7 @@ public class AuthService {
         userConditionRepository.saveAll(userConditions);
     }
 
-    private void saveAllergies(List<String> allergies, UUID userId) {
+    protected void saveAllergies(List<String> allergies, UUID userId) {
         if (allergies == null || allergies.isEmpty()) {
             return;
         }

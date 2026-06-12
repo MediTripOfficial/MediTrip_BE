@@ -17,4 +17,6 @@ public interface UserAllergyRepository extends JpaRepository<UserAllergy, Long> 
             """)
     List<String> findAllergyNamesByUserId(UUID userId);
 
+    void deleteAllByUserId(UUID userId);
+
 }

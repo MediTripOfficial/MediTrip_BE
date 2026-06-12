@@ -64,7 +64,8 @@ public class User extends BaseEntity {
 
     private static final String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,20}$";
 
-    public static User createLocalUser(UUID id, String email, String encodedPassword, String password, String name, String nickname,
+    public static User createLocalUser(UUID id, String email, String encodedPassword, String password, String name,
+                                       String nickname,
                                        Double weight, Double height, LocalDate birth, Gender gender, String country,
                                        Boolean isMarketingTermsAgreed, String profileImg) {
         validateName(id, name);
@@ -88,6 +89,23 @@ public class User extends BaseEntity {
                 .status(UserStatus.ACTIVE)
                 .profileImg(profileImg)
                 .build();
+    }
+
+    public void updateInfo(String name, String nickname, Double weight, Double height, LocalDate birth, Gender gender,
+                           String country, Boolean isMarketingTermsAgreed, String profileImg) {
+        validateName(this.id, name);
+        validateBirth(this.id, birth);
+        validateGender(this.id, gender);
+
+        this.name = name;
+        this.nickname = nickname;
+        this.weight = weight;
+        this.height = height;
+        this.birth = birth;
+        this.gender = gender;
+        this.country = country;
+        this.isMarketingTermsAgreed = isMarketingTermsAgreed;
+        this.profileImg = profileImg;
     }
 
     private static void validateName(UUID id, String name) {
