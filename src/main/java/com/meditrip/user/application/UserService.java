@@ -7,6 +7,7 @@ import com.meditrip.user.domain.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,14 @@ public class UserService {
                 .orElseThrow(() -> {
                     log.info("{} 유저 정보가 존재하지 않습니다. Email : [{}]", method, maskedEmail);
                     return new BadCredentialsException("Incorrect email or password.");
+                });
+    }
+
+    @Transactional(readOnly = true)
+    public void checkEmailDuplication(String email) {
+        userRepository.findByEmailAndStatusIn(email, List.of(UserStatus.ACTIVE, UserStatus.GUEST))
+                .ifPresent(u -> {
+                    throw new DuplicateKeyException("Email already exists.");
                 });
     }
 
