@@ -141,6 +141,11 @@ public class User extends BaseEntity {
         }
     }
 
+    public void updatePassword(String plainPassword, String encodedPassword) {
+        validatePassword(this.id, plainPassword);
+        this.password = encodedPassword;
+    }
+
     private static void validatePassword(UUID id, String password) {
         if (password == null || password.trim().isEmpty()) {
             log.warn("비밀번호가 비어있음. User Id : [{}]", id);
@@ -172,5 +177,4 @@ public class User extends BaseEntity {
     public void withdrawn() {
         this.status = UserStatus.WITHDRAWN;
     }
-
 }

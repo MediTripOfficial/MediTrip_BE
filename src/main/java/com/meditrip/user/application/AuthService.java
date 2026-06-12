@@ -159,4 +159,10 @@ public class AuthService {
         }
     }
 
+    @Transactional
+    public void updatePassword(User user, String newPassword) {
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.updatePassword(newPassword, encodedPassword);
+    }
+
 }
