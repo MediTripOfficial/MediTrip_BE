@@ -25,4 +25,14 @@ public class UserController {
         return ResponseEntity.ok( "사용 가능");
     }
 
+    @GetMapping("/nickname/check")
+    public ResponseEntity<String> checkNicknameDuplication(@RequestParam(required = false) String nickname) {
+        if (nickname == null || nickname.isBlank()) {
+            throw new IllegalArgumentException("Nickname is required.");
+        }
+
+        userService.checkNicknameDuplication(nickname);
+        return ResponseEntity.ok( "사용 가능");
+    }
+
 }

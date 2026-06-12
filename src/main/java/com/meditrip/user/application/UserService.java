@@ -39,4 +39,12 @@ public class UserService {
                 });
     }
 
+    @Transactional(readOnly = true)
+    public void checkNicknameDuplication(String nickname) {
+        userRepository.findByNicknameAndStatusIn(nickname, List.of(UserStatus.ACTIVE, UserStatus.GUEST))
+                .ifPresent(u -> {
+                    throw new DuplicateKeyException("Nickname already exists.");
+                });
+    }
+
 }

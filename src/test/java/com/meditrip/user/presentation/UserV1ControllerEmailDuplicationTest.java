@@ -34,7 +34,7 @@ class UserV1ControllerEmailDuplicationTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$").value("사용 가능"));
     }
 
-    @DisplayName("이메일 중복 검사 시 가입된 이메일이 존재하고 ACTIVE, GUEST, SUSPENDED, BLOCKED 상태라면 409를 반환한다.")
+    @DisplayName("이메일 중복 검사 시 가입된 이메일이 존재하고 ACTIVE, GUEST 상태라면 409를 반환한다.")
     @ParameterizedTest(name = "[{index}] 유저 상태: {0}")
     @EnumSource(value = UserStatus.class, names = {"ACTIVE", "GUEST"})
     void shouldReturn409Conflict_whenEmailExistsWithActiveOrRestrictedStatus(UserStatus status) throws Exception {
