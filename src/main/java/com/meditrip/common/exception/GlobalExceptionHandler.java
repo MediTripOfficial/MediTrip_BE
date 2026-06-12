@@ -98,4 +98,15 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
+    @ExceptionHandler(JwtAuthenticationException.class)
+    public ResponseEntity<ErrorDTO> handleJwtAuthenticationException(JwtAuthenticationException e) {
+        log.error(e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ErrorDTO.builder()
+                        .code(HttpStatus.UNAUTHORIZED.getReasonPhrase())
+                        .message(e.getMessage())
+                        .build());
+    }
+
 }
