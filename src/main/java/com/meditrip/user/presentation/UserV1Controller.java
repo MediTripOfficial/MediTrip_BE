@@ -4,6 +4,7 @@ import com.meditrip.common.jwt.CustomUserDetails;
 import com.meditrip.user.application.UserFacade;
 import com.meditrip.user.application.UserService;
 import com.meditrip.user.application.dto.response.UserInfoResponse;
+import com.meditrip.user.presentation.dto.request.OnboardingRequest;
 import com.meditrip.user.presentation.dto.request.UpdatePasswordRequest;
 import com.meditrip.user.presentation.dto.request.UpdateUserInfoRequest;
 import com.meditrip.user.presentation.dto.request.WithdrawnRequest;
@@ -15,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,7 +38,7 @@ public class UserV1Controller {
         }
 
         userService.checkEmailDuplication(email);
-        return ResponseEntity.ok( "사용 가능");
+        return ResponseEntity.ok("사용 가능");
     }
 
     @GetMapping("/nickname/check")
@@ -46,7 +48,7 @@ public class UserV1Controller {
         }
 
         userService.checkNicknameDuplication(nickname);
-        return ResponseEntity.ok( "사용 가능");
+        return ResponseEntity.ok("사용 가능");
     }
 
     @GetMapping("/me")
@@ -56,8 +58,9 @@ public class UserV1Controller {
 
     @PutMapping("/me")
     public ResponseEntity<UserInfoResponse> updateUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                        @Valid @RequestBody UpdateUserInfoRequest request) {
-        return ResponseEntity.ok(userFacade.updateUserInfo(UUID.fromString(userDetails.getUserId()), request.toApplicationRequest()));
+                                                           @Valid @RequestBody UpdateUserInfoRequest request) {
+        return ResponseEntity.ok(
+                userFacade.updateUserInfo(UUID.fromString(userDetails.getUserId()), request.toApplicationRequest()));
     }
 
     @DeleteMapping("/me")
@@ -69,9 +72,16 @@ public class UserV1Controller {
 
     @PatchMapping("/me/password")
     public ResponseEntity<Void> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                            @Valid @RequestBody UpdatePasswordRequest request) {
+                                               @Valid @RequestBody UpdatePasswordRequest request) {
         userFacade.updatePassword(UUID.fromString(userDetails.getUserId()), request.toApplicationRequest());
         return ResponseEntity.ok(null);
+    }
+
+    @PostMapping("/onboarding")
+    public ResponseEntity<UserInfoResponse> onboarding(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                       @Valid @RequestBody OnboardingRequest onboardingRequest) {
+        return ResponseEntity.ok(userFacade.onboarding(UUID.fromString(userDetails.getUserId()),
+                onboardingRequest.toApplicationRequest()));
     }
 
 }

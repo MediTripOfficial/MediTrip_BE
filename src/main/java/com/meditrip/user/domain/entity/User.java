@@ -119,6 +119,24 @@ public class User extends BaseEntity {
         this.profileImg = profileImg;
     }
 
+    public void onboarding(UUID id, String name, String nickname, Double weight, Double height, LocalDate birth,
+                           Gender gender, String country, Boolean isMarketingTermsAgreed, String profileImg) {
+        validateName(id, name);
+        validateBirth(id, birth);
+        validateGender(id, gender);
+
+        this.name = name;
+        this.nickname = nickname;
+        this.weight = weight;
+        this.height = height;
+        this.birth = birth;
+        this.gender = gender;
+        this.country = country;
+        this.isMarketingTermsAgreed = isMarketingTermsAgreed;
+        this.status = UserStatus.ACTIVE;
+        this.profileImg = profileImg;
+    }
+
     private static void validateName(UUID id, String name) {
         if (name == null || name.trim().isEmpty()) {
             log.warn("도메인 제약 위반: 이름이 비어있음. User Id : [{}]", id);
