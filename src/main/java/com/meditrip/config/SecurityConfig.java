@@ -2,6 +2,10 @@ package com.meditrip.config;
 
 import com.meditrip.common.constant.PublicPaths;
 import com.meditrip.common.jwt.JwtFilter;
+import com.meditrip.config.oauth.OAuth2UserCustomService;
+import com.meditrip.config.oauth.OAuthCookieRepository;
+import com.meditrip.config.oauth.handler.OAuth2FailureHandler;
+import com.meditrip.config.oauth.handler.OAuth2SuccessHandler;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,6 +30,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    private final OAuth2UserCustomService oAuth2UserCustomService;
+    private final OAuthCookieRepository oAuthCookieRepository;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2FailureHandler oAuth2FailureHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -53,6 +61,15 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(endpoint -> endpoint
+                                .baseUri("/api/v1/auth/login")
+                                .authorizationRequestRepository(oAuthCookieRepository))
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(oAuth2UserCustomService))
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureHandler(oAuth2FailureHandler)
+                )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();

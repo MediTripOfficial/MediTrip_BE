@@ -27,6 +27,18 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - email
+              - profile
+
 jwt:
   secret: ${JWT_SECRET}
   access-token-expiration: 3600000 # 1시간 (1000 * 60 * 60)

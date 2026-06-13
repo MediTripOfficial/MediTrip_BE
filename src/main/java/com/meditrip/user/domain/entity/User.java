@@ -91,6 +91,17 @@ public class User extends BaseEntity {
                 .build();
     }
 
+    public static User oauthSignupUser(UUID userId, String email, String name, Provider provider) {
+        return User.builder()
+                .id(userId)
+                .email(email)
+                .name(name)
+                .provider(provider)
+                .status(UserStatus.GUEST)
+                .isMarketingTermsAgreed(false)
+                .build();
+    }
+
     public void updateInfo(String name, String nickname, Double weight, Double height, LocalDate birth, Gender gender,
                            String country, Boolean isMarketingTermsAgreed, String profileImg) {
         validateName(this.id, name);
