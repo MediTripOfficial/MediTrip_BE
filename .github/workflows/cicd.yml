@@ -119,6 +119,8 @@ jobs:
             REDIS_HOST=redis
             REDIS_PORT=6379
             TAG=${{ github.sha }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
             EOF
 
             # 최신 이미지 pull

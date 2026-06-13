@@ -5,6 +5,7 @@ import com.meditrip.user.application.AuthFacade;
 import com.meditrip.user.application.dto.response.TokenResponse;
 import com.meditrip.user.presentation.dto.request.LoginRequest;
 import com.meditrip.user.presentation.dto.request.SignupRequest;
+import com.meditrip.user.presentation.dto.request.TokenRefreshRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.UUID;
@@ -44,4 +45,10 @@ public class AuthV1Controller {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/refresh")
+    @Operation(summary = "토큰 재발급", description = "만료된 Access Token을 Refresh Token을 통해 재발급합니다.")
+    public ResponseEntity<TokenResponse> reissueToken(@RequestBody @Valid TokenRefreshRequest request) {
+        TokenResponse response = authFacade.reissue(request.getRefreshToken());
+        return ResponseEntity.ok(response);
+    }
 }

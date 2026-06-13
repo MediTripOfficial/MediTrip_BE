@@ -1,6 +1,7 @@
 package com.meditrip.common.jwt;
 
 import com.meditrip.common.exception.JwtAuthenticationException;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
@@ -64,6 +65,26 @@ public class JwtProvider {
             throw e;
         } catch (Exception e) {
             throw new JwtAuthenticationException();
+        }
+    }
+
+    public boolean validateRefreshToken(String token) {
+        try {
+            String tokenType = Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .get(jwtProperties.tokenTypeClaim(), String.class);
+
+            if (!jwtProperties.refreshTokenType().equals(tokenType)) {
+                throw new JwtAuthenticationException("Invalid refresh token.");
+            }
+            return true;
+        } catch (ExpiredJwtException e) {
+            throw new JwtAuthenticationException("Refresh token has expired.");
+        } catch (Exception e) {
+            throw new JwtAuthenticationException("Invalid refresh token.");
         }
     }
 

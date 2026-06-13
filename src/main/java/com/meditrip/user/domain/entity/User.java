@@ -1,6 +1,7 @@
 package com.meditrip.user.domain.entity;
 
 import com.meditrip.common.domain.BaseEntity;
+import com.meditrip.common.exception.NotFoundException;
 import com.meditrip.user.domain.entity.enums.Gender;
 import com.meditrip.user.domain.entity.enums.Provider;
 import com.meditrip.user.domain.entity.enums.UserStatus;
@@ -63,7 +64,8 @@ public class User extends BaseEntity {
 
     private static final String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,20}$";
 
-    public static User createLocalUser(UUID id, String email, String encodedPassword, String password, String name, String nickname,
+    public static User createLocalUser(UUID id, String email, String encodedPassword, String password, String name,
+                                       String nickname,
                                        Double weight, Double height, LocalDate birth, Gender gender, String country,
                                        Boolean isMarketingTermsAgreed, String profileImg) {
         validateName(id, name);
@@ -87,6 +89,52 @@ public class User extends BaseEntity {
                 .status(UserStatus.ACTIVE)
                 .profileImg(profileImg)
                 .build();
+    }
+
+    public static User oauthSignupUser(UUID userId, String email, String name, Provider provider) {
+        return User.builder()
+                .id(userId)
+                .email(email)
+                .name(name)
+                .provider(provider)
+                .status(UserStatus.GUEST)
+                .isMarketingTermsAgreed(false)
+                .build();
+    }
+
+    public void updateInfo(String name, String nickname, Double weight, Double height, LocalDate birth, Gender gender,
+                           String country, Boolean isMarketingTermsAgreed, String profileImg) {
+        validateName(this.id, name);
+        validateBirth(this.id, birth);
+        validateGender(this.id, gender);
+
+        this.name = name;
+        this.nickname = nickname;
+        this.weight = weight;
+        this.height = height;
+        this.birth = birth;
+        this.gender = gender;
+        this.country = country;
+        this.isMarketingTermsAgreed = isMarketingTermsAgreed;
+        this.profileImg = profileImg;
+    }
+
+    public void onboarding(UUID id, String name, String nickname, Double weight, Double height, LocalDate birth,
+                           Gender gender, String country, Boolean isMarketingTermsAgreed, String profileImg) {
+        validateName(id, name);
+        validateBirth(id, birth);
+        validateGender(id, gender);
+
+        this.name = name;
+        this.nickname = nickname;
+        this.weight = weight;
+        this.height = height;
+        this.birth = birth;
+        this.gender = gender;
+        this.country = country;
+        this.isMarketingTermsAgreed = isMarketingTermsAgreed;
+        this.status = UserStatus.ACTIVE;
+        this.profileImg = profileImg;
     }
 
     private static void validateName(UUID id, String name) {
@@ -122,6 +170,11 @@ public class User extends BaseEntity {
         }
     }
 
+    public void updatePassword(String plainPassword, String encodedPassword) {
+        validatePassword(this.id, plainPassword);
+        this.password = encodedPassword;
+    }
+
     private static void validatePassword(UUID id, String password) {
         if (password == null || password.trim().isEmpty()) {
             log.warn("비밀번호가 비어있음. User Id : [{}]", id);
@@ -134,7 +187,7 @@ public class User extends BaseEntity {
         }
     }
 
-    public void validateStatus() {
+    public void validateStatusForLogin() {
         switch (this.status) {
             case WITHDRAWN, DELETED -> throw new BadCredentialsException("Incorrect email or password.");
             default -> {
@@ -142,4 +195,15 @@ public class User extends BaseEntity {
         }
     }
 
+    public void validateStatus() {
+        switch (this.status) {
+            case WITHDRAWN, DELETED -> throw new NotFoundException("User Not Found");
+            default -> {
+            }
+        }
+    }
+
+    public void withdrawn() {
+        this.status = UserStatus.WITHDRAWN;
+    }
 }

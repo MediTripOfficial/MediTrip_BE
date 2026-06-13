@@ -1,5 +1,6 @@
 package com.meditrip.user.application;
 
+import com.meditrip.user.application.dto.request.OnboardingApplicationRequest;
 import com.meditrip.user.application.dto.request.SignupApplicationRequest;
 import com.meditrip.user.domain.entity.Allergy;
 import com.meditrip.user.domain.entity.Condition;
@@ -58,7 +59,6 @@ public class AuthService {
         return saved.getId();
     }
 
-
     private void validSignUp(SignupApplicationRequest request) {
         userRepository.findByEmail(request.getEmail()).ifPresent(user -> {
             UserStatus status = user.getStatus();
@@ -78,7 +78,7 @@ public class AuthService {
         });
     }
 
-    private void saveConditions(List<String> underlyingDisease, UUID userId) {
+    protected void saveConditions(List<String> underlyingDisease, UUID userId) {
         if (underlyingDisease == null || underlyingDisease.isEmpty()) {
             return;
         }
@@ -113,7 +113,7 @@ public class AuthService {
         userConditionRepository.saveAll(userConditions);
     }
 
-    private void saveAllergies(List<String> allergies, UUID userId) {
+    protected void saveAllergies(List<String> allergies, UUID userId) {
         if (allergies == null || allergies.isEmpty()) {
             return;
         }
@@ -148,10 +148,22 @@ public class AuthService {
         userAllergyRepository.saveAll(userAllergy);
     }
 
-    public void verifyPassword(String inputPassword, String storedPassword) {
+    public void verifyPasswordForLogin(String inputPassword, String storedPassword) {
         if (!passwordEncoder.matches(inputPassword, storedPassword)) {
             throw new BadCredentialsException("Incorrect email or password.");
         }
+    }
+
+    public void verifyPassword(String inputPassword, String storedPassword) {
+        if (!passwordEncoder.matches(inputPassword, storedPassword)) {
+            throw new IllegalArgumentException("Passwords do not match");
+        }
+    }
+
+    @Transactional
+    public void updatePassword(User user, String newPassword) {
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.updatePassword(newPassword, encodedPassword);
     }
 
 }
