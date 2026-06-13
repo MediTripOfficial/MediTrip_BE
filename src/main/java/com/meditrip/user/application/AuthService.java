@@ -1,5 +1,6 @@
 package com.meditrip.user.application;
 
+import com.meditrip.user.application.dto.request.OnboardingApplicationRequest;
 import com.meditrip.user.application.dto.request.SignupApplicationRequest;
 import com.meditrip.user.domain.entity.Allergy;
 import com.meditrip.user.domain.entity.Condition;

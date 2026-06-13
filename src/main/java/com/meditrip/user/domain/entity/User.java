@@ -91,6 +91,17 @@ public class User extends BaseEntity {
                 .build();
     }
 
+    public static User oauthSignupUser(UUID userId, String email, String name, Provider provider) {
+        return User.builder()
+                .id(userId)
+                .email(email)
+                .name(name)
+                .provider(provider)
+                .status(UserStatus.GUEST)
+                .isMarketingTermsAgreed(false)
+                .build();
+    }
+
     public void updateInfo(String name, String nickname, Double weight, Double height, LocalDate birth, Gender gender,
                            String country, Boolean isMarketingTermsAgreed, String profileImg) {
         validateName(this.id, name);
@@ -105,6 +116,24 @@ public class User extends BaseEntity {
         this.gender = gender;
         this.country = country;
         this.isMarketingTermsAgreed = isMarketingTermsAgreed;
+        this.profileImg = profileImg;
+    }
+
+    public void onboarding(UUID id, String name, String nickname, Double weight, Double height, LocalDate birth,
+                           Gender gender, String country, Boolean isMarketingTermsAgreed, String profileImg) {
+        validateName(id, name);
+        validateBirth(id, birth);
+        validateGender(id, gender);
+
+        this.name = name;
+        this.nickname = nickname;
+        this.weight = weight;
+        this.height = height;
+        this.birth = birth;
+        this.gender = gender;
+        this.country = country;
+        this.isMarketingTermsAgreed = isMarketingTermsAgreed;
+        this.status = UserStatus.ACTIVE;
         this.profileImg = profileImg;
     }
 

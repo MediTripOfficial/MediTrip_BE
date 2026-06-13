@@ -1,13 +1,16 @@
 package com.meditrip.user.application;
 
+import com.meditrip.user.application.dto.request.OnboardingApplicationRequest;
 import com.meditrip.user.application.dto.request.UpdatePasswordApplicationRequest;
 import com.meditrip.user.application.dto.request.UpdateUserInfoApplicationRequest;
 import com.meditrip.user.application.dto.request.WithdrawnApplicationRequest;
 import com.meditrip.user.application.dto.response.UserInfoResponse;
 import com.meditrip.user.domain.entity.User;
+import com.meditrip.user.domain.entity.enums.UserStatus;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,6 +60,27 @@ public class UserFacade {
 
         authService.verifyPassword(request.getExistingPassword(), user.getPassword());
         authService.updatePassword(user, request.getNewPassword());
+    }
+
+    @Transactional
+    public UserInfoResponse onboarding(UUID userId, OnboardingApplicationRequest request) {
+        log.info("유저 온보딩 요청. User Id : [{}], 업데이트 요청 정보 : [{}]", userId, request.toString());
+
+        User user = userService.findById(userId, "온보딩");
+
+        if (!user.getStatus().equals(UserStatus.GUEST)) {
+            log.info("GUEST 상태가 아닌 유저가 온보딩 요청. User Id : [{}]", userId);
+            throw new AccessDeniedException("You don't have permission to access this page.");
+        }
+
+        user.onboarding(userId, request.getName(), request.getNickname(), request.getWeight(), request.getHeight(),
+                request.getBirth(), request.getGender(), request.getCountry(), request.isMarketingTermsAgreed(),
+                request.getProfileImg());
+
+        authService.saveConditions(request.getUnderlyingDisease(), userId);
+        authService.saveAllergies(request.getAllergies(), userId);
+
+        return UserInfoResponse.from(user, request.getUnderlyingDisease(), request.getAllergies());
     }
 
 }
