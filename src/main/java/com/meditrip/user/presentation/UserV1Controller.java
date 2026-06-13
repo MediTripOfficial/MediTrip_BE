@@ -8,6 +8,7 @@ import com.meditrip.user.presentation.dto.request.OnboardingRequest;
 import com.meditrip.user.presentation.dto.request.UpdatePasswordRequest;
 import com.meditrip.user.presentation.dto.request.UpdateUserInfoRequest;
 import com.meditrip.user.presentation.dto.request.WithdrawnRequest;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class UserV1Controller {
     private final UserFacade userFacade;
 
     @GetMapping("/email/check")
+    @Operation(summary = "이메일 중복 검사")
     public ResponseEntity<String> checkEmailDuplication(@RequestParam(required = false) String email) {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("Email is required.");
@@ -42,6 +44,7 @@ public class UserV1Controller {
     }
 
     @GetMapping("/nickname/check")
+    @Operation(summary = "닉네임 중복 검사")
     public ResponseEntity<String> checkNicknameDuplication(@RequestParam(required = false) String nickname) {
         if (nickname == null || nickname.isBlank()) {
             throw new IllegalArgumentException("Nickname is required.");
@@ -52,11 +55,13 @@ public class UserV1Controller {
     }
 
     @GetMapping("/me")
+    @Operation(summary = "유저 정보 조회")
     public ResponseEntity<UserInfoResponse> getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(userService.getUserInfo(UUID.fromString(userDetails.getUserId())));
     }
 
     @PutMapping("/me")
+    @Operation(summary = "유저 정보 업데이트")
     public ResponseEntity<UserInfoResponse> updateUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                            @Valid @RequestBody UpdateUserInfoRequest request) {
         return ResponseEntity.ok(
@@ -64,6 +69,7 @@ public class UserV1Controller {
     }
 
     @DeleteMapping("/me")
+    @Operation(summary = "유저 탈퇴")
     public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails,
                                            @Valid @RequestBody WithdrawnRequest withdrawnRequest) {
         userFacade.deleteUser(UUID.fromString(userDetails.getUserId()), withdrawnRequest.toApplicationRequest());
@@ -71,6 +77,7 @@ public class UserV1Controller {
     }
 
     @PatchMapping("/me/password")
+    @Operation(summary = "유저 비밀번호 변경")
     public ResponseEntity<Void> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                @Valid @RequestBody UpdatePasswordRequest request) {
         userFacade.updatePassword(UUID.fromString(userDetails.getUserId()), request.toApplicationRequest());
@@ -78,6 +85,7 @@ public class UserV1Controller {
     }
 
     @PostMapping("/onboarding")
+    @Operation(summary = "소셜 로그인 온보딩")
     public ResponseEntity<UserInfoResponse> onboarding(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                        @Valid @RequestBody OnboardingRequest onboardingRequest) {
         return ResponseEntity.ok(userFacade.onboarding(UUID.fromString(userDetails.getUserId()),

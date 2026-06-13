@@ -81,8 +81,12 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public void validUpdateUser(String nickname) {
+    public void validUpdateUser(String nickname, UUID userId) {
         userRepository.findByNickname(nickname).ifPresent(user -> {
+            if (user.getId().equals(userId)){
+                return;
+            }
+
             UserStatus status = user.getStatus();
 
             if (status != UserStatus.DELETED && status != UserStatus.WITHDRAWN) {

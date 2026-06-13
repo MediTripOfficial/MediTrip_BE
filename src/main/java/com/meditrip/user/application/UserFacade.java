@@ -28,7 +28,7 @@ public class UserFacade {
         User user = userService.findById(userId, "유저 정보 업데이트");
         user.validateStatus();
 
-        userService.validUpdateUser(request.getNickname());
+        userService.validUpdateUser(request.getNickname(), userId);
 
         user.updateInfo(request.getName(), request.getNickname(), request.getWeight(), request.getHeight(),
                 request.getBirth(), request.getGender(), request.getCountry(), request.isMarketingTermsAgreed(),
