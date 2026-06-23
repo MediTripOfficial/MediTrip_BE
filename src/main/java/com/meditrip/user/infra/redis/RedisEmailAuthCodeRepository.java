@@ -93,4 +93,17 @@ public class RedisEmailAuthCodeRepository implements EmailAuthCodeStore {
         return Optional.of(authCode);
     }
 
+    @Override
+    public String findVerifiedTokenByEmail(String email) {
+        String key = TOKEN_PREFIX + email;
+        String token = redisTemplate.opsForValue().get(key);
+
+        if (token == null) {
+            log.warn("유효한 이메일 인증 증명 토큰이 존재하지 않거나 만료되었습니다. 이메일 : [{}]", SecurityUtils.convertToMaskedEmail(email));
+            throw new IllegalArgumentException("Email verification token is missing or has expired.");
+        }
+
+        return token;
+    }
+
 }

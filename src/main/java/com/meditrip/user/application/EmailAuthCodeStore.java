@@ -13,4 +13,6 @@ public interface EmailAuthCodeStore {
 
     Optional<String> findByEmail(String email);
 
+    String findVerifiedTokenByEmail(String email);
+
 }

@@ -21,9 +21,13 @@ public class AuthFacade {
     private final JwtProvider jwtProvider;
     private final TokenService tokenService;
     private final UserService userService;
+    private final EmailAuthCodeStore emailAuthCodeStore;
 
     public TokenResponse signup(SignupApplicationRequest request) {
-        //TODO : 이메일 인증 기능 구현 후 verifiedToken 검증 추가
+        String email = request.getEmail();
+        String verifiedToken = emailAuthCodeStore.findVerifiedTokenByEmail(email);
+
+        validEmailVerificationToken(verifiedToken, email, request.getVerifiedToken());
 
         UUID userId = authService.signup(request);
 
@@ -31,6 +35,8 @@ public class AuthFacade {
         String refreshToken = jwtProvider.generateRefreshToken(userId.toString());
 
         tokenService.saveRefreshToken(userId, refreshToken);
+
+        emailAuthCodeStore.deleteVerifiedTokenByEmail(email);
 
         return TokenResponse.builder()
                 .accessToken(accessToken)
@@ -84,6 +90,18 @@ public class AuthFacade {
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .build();
+    }
+
+    private void validEmailVerificationToken(String verifiedToken, String email, String request) {
+        if (verifiedToken.isEmpty()) {
+            log.warn("유효한 이메일 인증 토큰이 존재하지 않거나 만료되었습니다. 이메일 : [{}]", SecurityUtils.convertToMaskedEmail(email));
+            throw new IllegalArgumentException("Email verification token is missing or has expired.");
+        }
+
+        if (!verifiedToken.equals(request)) {
+            log.info("이메일 인증 토큰이 동일하지 않습니다. 이메일 : [{}]", SecurityUtils.convertToMaskedEmail(email));
+            throw new IllegalArgumentException("Email verification token is missing or has expired.");
+        }
     }
 
 }
