@@ -16,6 +16,8 @@ public class GoogleUserInfo implements OAuth2UserInfo {
         this.id = requireString(attributes, "sub");
         this.email = requireString(attributes, "email");
         this.name = requireString(attributes, "name");
+
+        requireVerifiedEmail(attributes);
     }
 
     private static String requireString(Map<String, Object> attributes, String key) {
@@ -24,6 +26,14 @@ public class GoogleUserInfo implements OAuth2UserInfo {
             throw new IllegalArgumentException("Missing or invalid OAuth attribute: " + key);
         }
         return s;
+    }
+
+    private static void requireVerifiedEmail(Map<String, Object> attributes) {
+        Object verified = attributes.get("email_verified");
+        boolean isVerified = Boolean.TRUE.equals(verified) || "true".equalsIgnoreCase(String.valueOf(verified));
+        if (!isVerified) {
+            throw new IllegalArgumentException("Email is not verified by provider.");
+        }
     }
 
     @Override
