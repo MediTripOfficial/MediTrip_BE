@@ -50,9 +50,13 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     runtimeOnly 'com.h2database:h2'
     testImplementation 'it.ozimov:embedded-redis:0.7.2'
+    testImplementation 'org.awaitility:awaitility:4.2.0'
 
     // OAUTH2
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    // Mail
+    implementation 'org.springframework.boot:spring-boot-starter-mail:4.0.5'
 }
 
 tasks.named('test') {

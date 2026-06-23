@@ -6,6 +6,7 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailSendException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -117,6 +118,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(ErrorDTO.builder()
                         .code(HttpStatus.FORBIDDEN.getReasonPhrase())
+                        .message(e.getMessage())
+                        .build());
+    }
+
+    @ExceptionHandler(MailSendException.class)
+    public ResponseEntity<ErrorDTO> handleMailSendException(MailSendException e) {
+        log.error(e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorDTO.builder()
+                        .code(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
                         .message(e.getMessage())
                         .build());
     }
