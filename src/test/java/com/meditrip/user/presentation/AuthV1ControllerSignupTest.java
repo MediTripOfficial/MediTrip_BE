@@ -1,10 +1,15 @@
 package com.meditrip.user.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.meditrip.user.application.EmailAuthCodeStore;
 import com.meditrip.user.domain.entity.Allergy;
 import com.meditrip.user.domain.entity.Condition;
 import com.meditrip.user.domain.entity.User;
@@ -29,6 +34,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 class AuthV1ControllerSignupTest extends ControllerTestSupport {
 
@@ -47,6 +53,9 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
     @Autowired
     private UserAllergyRepository userAllergyRepository;
 
+    @MockitoBean
+    private EmailAuthCodeStore emailAuthCodeStore;
+
     @AfterEach
     void tearDown() {
         userConditionRepository.deleteAllInBatch();
@@ -62,6 +71,9 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
         //given
         String email = "test@test.com";
         String verifiedToken = UUID.randomUUID().toString();
+
+        given(emailAuthCodeStore.findVerifiedTokenByEmail(email))
+                .willReturn(verifiedToken);
 
         SignupRequest signupRequest = SignupRequest.builder()
                 .email(email)
@@ -89,6 +101,77 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
 
         //then
         assertThat(userRepository.count()).isEqualTo(1);
+    }
+
+    @DisplayName("이메일 인증 토큰이 없으면 회원가입에 실패한다.")
+    @Test
+    void shouldFailSignUp_whenVerifiedTokenNotFound() throws Exception {
+        //given
+        String email = "test@test.com";
+
+        given(emailAuthCodeStore.findVerifiedTokenByEmail(email)).willReturn("");
+
+        SignupRequest signupRequest = SignupRequest.builder()
+                .email(email)
+                .password("password1234Test!")
+                .name("테스트 유저")
+                .nickname("닉네임")
+                .weight(80.0)
+                .height(190.2)
+                .birth(LocalDate.of(2002, 5, 5))
+                .gender("F")
+                .country("KR")
+                .underlyingDisease(List.of("NONE"))
+                .allergies(null)
+                .isMarketingTermsAgreed(true)
+                .verifiedToken(UUID.randomUUID().toString())
+                .build();
+
+        //when, then
+        mockMvc.perform(post("/api/v1/auth/signup/local")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(signupRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Email verification token is missing or has expired."));
+
+        assertThat(userRepository.count()).isEqualTo(0);
+        then(emailAuthCodeStore).should(never()).deleteVerifiedTokenByEmail(any());
+    }
+
+    @DisplayName("이메일 인증 토큰이 일치하지 않으면 회원가입에 실패한다.")
+    @Test
+    void shouldFailSignUp_whenVerifiedTokenMismatch() throws Exception {
+        //given
+        String email = "test@test.com";
+
+        given(emailAuthCodeStore.findVerifiedTokenByEmail(email))
+                .willReturn(UUID.randomUUID().toString());
+
+        SignupRequest signupRequest = SignupRequest.builder()
+                .email(email)
+                .password("password1234Test!")
+                .name("테스트 유저")
+                .nickname("닉네임")
+                .weight(80.0)
+                .height(190.2)
+                .birth(LocalDate.of(2002, 5, 5))
+                .gender("F")
+                .country("KR")
+                .underlyingDisease(List.of("NONE"))
+                .allergies(null)
+                .isMarketingTermsAgreed(true)
+                .verifiedToken(UUID.randomUUID().toString())
+                .build();
+
+        //when, then
+        mockMvc.perform(post("/api/v1/auth/signup/local")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(signupRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Email verification token is missing or has expired."));
+
+        assertThat(userRepository.count()).isEqualTo(0);
+        then(emailAuthCodeStore).should(never()).deleteVerifiedTokenByEmail(any());
     }
 
     @DisplayName("이미 가입된 계정이 게스트, 정상 계정이면 회원가입에 실패하고, 409를 반환한다.")
@@ -132,6 +215,10 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
                 .verifiedToken(verifiedToken)
                 .build();
 
+
+        given(emailAuthCodeStore.findVerifiedTokenByEmail(signupRequest.getEmail()))
+                .willReturn(signupRequest.getVerifiedToken());
+
         //when
         mockMvc.perform(post("/api/v1/auth/signup/local")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -151,6 +238,9 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
         //given
         String verifiedToken = UUID.randomUUID().toString();
         String email = "test@test.com";
+
+        given(emailAuthCodeStore.findVerifiedTokenByEmail(email))
+                .willReturn(verifiedToken);
 
         userRepository.save(User.builder()
                 .id(UUID.randomUUID())
@@ -209,6 +299,9 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
         //given
         String email = "test@test.com";
         String verifiedToken = UUID.randomUUID().toString();
+
+        given(emailAuthCodeStore.findVerifiedTokenByEmail(email))
+                .willReturn(verifiedToken);
 
         userRepository.save(User.builder()
                 .id(UUID.randomUUID())
@@ -435,6 +528,9 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
                 .underlyingDisease(List.of("DIABETES"))
                 .build();
 
+        given(emailAuthCodeStore.findVerifiedTokenByEmail(signupRequest.getEmail()))
+                .willReturn(signupRequest.getVerifiedToken());
+
         //when
         mockMvc.perform(post("/api/v1/auth/signup/local")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -456,6 +552,9 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
                 .underlyingDisease(List.of("diabetes"))
                 .build();
 
+        given(emailAuthCodeStore.findVerifiedTokenByEmail(signupRequest.getEmail()))
+                .willReturn(signupRequest.getVerifiedToken());
+
         //when
         mockMvc.perform(post("/api/v1/auth/signup/local")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -474,6 +573,9 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
         SignupRequest signupRequest = createValidSignupRequest().toBuilder()
                 .underlyingDisease(List.of("DIABETES", "ASTHMA", "CARDIOVASCULAR_DISEASE"))
                 .build();
+
+        given(emailAuthCodeStore.findVerifiedTokenByEmail(signupRequest.getEmail()))
+                .willReturn(signupRequest.getVerifiedToken());
 
         //when
         mockMvc.perform(post("/api/v1/auth/signup/local")
@@ -496,6 +598,10 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
                 .underlyingDisease(List.of("diabetes", "ASTHMA"))
                 .build();
 
+        given(emailAuthCodeStore.findVerifiedTokenByEmail(signupRequest.getEmail()))
+                .willReturn(signupRequest.getVerifiedToken());
+
+
         //when
         mockMvc.perform(post("/api/v1/auth/signup/local")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -514,6 +620,9 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
         SignupRequest signupRequest = createValidSignupRequest().toBuilder()
                 .allergies(List.of("Milk"))
                 .build();
+
+        given(emailAuthCodeStore.findVerifiedTokenByEmail(signupRequest.getEmail()))
+                .willReturn(signupRequest.getVerifiedToken());
 
         //when
         mockMvc.perform(post("/api/v1/auth/signup/local")
@@ -536,6 +645,9 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
                 .allergies(List.of("milk"))
                 .build();
 
+        given(emailAuthCodeStore.findVerifiedTokenByEmail(signupRequest.getEmail()))
+                .willReturn(signupRequest.getVerifiedToken());
+
         //when
         mockMvc.perform(post("/api/v1/auth/signup/local")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -555,6 +667,9 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
                 .allergies(List.of("Milk", "Eggs", "Nuts"))
                 .build();
 
+        given(emailAuthCodeStore.findVerifiedTokenByEmail(signupRequest.getEmail()))
+                .willReturn(signupRequest.getVerifiedToken());
+
         //when
         mockMvc.perform(post("/api/v1/auth/signup/local")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -573,6 +688,9 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
         SignupRequest signupRequest = createValidSignupRequest().toBuilder()
                 .allergies(null)
                 .build();
+
+        given(emailAuthCodeStore.findVerifiedTokenByEmail(signupRequest.getEmail()))
+                .willReturn(signupRequest.getVerifiedToken());
 
         //when
         mockMvc.perform(post("/api/v1/auth/signup/local")
@@ -594,6 +712,9 @@ class AuthV1ControllerSignupTest extends ControllerTestSupport {
         SignupRequest signupRequest = createValidSignupRequest().toBuilder()
                 .allergies(List.of("milk", "eggs"))
                 .build();
+
+        given(emailAuthCodeStore.findVerifiedTokenByEmail(signupRequest.getEmail()))
+                .willReturn(signupRequest.getVerifiedToken());
 
         //when
         mockMvc.perform(post("/api/v1/auth/signup/local")

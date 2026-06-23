@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -77,8 +76,9 @@ public class SignupRequest {
                 .underlyingDisease(this.underlyingDisease)
                 .allergies(this.allergies)
                 .isMarketingTermsAgreed(this.isMarketingTermsAgreed)
-                .verifiedToken(UUID.fromString(this.verifiedToken))
+                .verifiedToken(this.verifiedToken)
                 .profileImg(this.profileImg)
                 .build();
     }
+
 }
