@@ -7,8 +7,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
 import com.meditrip.common.exception.JwtAuthenticationException;
@@ -22,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.BadCredentialsException;
 
 @ExtendWith(MockitoExtension.class)
 class AuthFacadeRefreshTokenTest {
@@ -93,8 +96,10 @@ class AuthFacadeRefreshTokenTest {
         String clientRefreshToken = "client.refresh.token";
         String dbDifferentToken = "different.db.refresh.token";
         UUID userId = UUID.randomUUID();
+        User user = mock(User.class);
 
         given(jwtProvider.getUserId(clientRefreshToken)).willReturn(userId.toString());
+        given(userService.findById(any(UUID.class), any())).willReturn(user);
         given(tokenService.getRefreshToken(any(UUID.class))).willReturn(dbDifferentToken);
 
         //when, then
@@ -112,14 +117,37 @@ class AuthFacadeRefreshTokenTest {
         //given
         String clientRefreshToken = "client.refresh.token";
         UUID userId = UUID.randomUUID();
+        User user = mock(User.class);
 
         given(jwtProvider.getUserId(clientRefreshToken)).willReturn(userId.toString());
+        given(userService.findById(any(UUID.class), any())).willReturn(user);
         given(tokenService.getRefreshToken(any(UUID.class))).willReturn(null);
 
         //when, then
         assertThatThrownBy(() -> authFacade.reissue(clientRefreshToken))
                 .isInstanceOf(JwtAuthenticationException.class)
                 .hasMessage("Invalid refresh token.");
+    }
+
+    @DisplayName("탈퇴 또는 삭제된 유저는 토큰 재발급에 실패한다.")
+    @Test
+    void shouldThrowException_whenUserStatusIsWithdrawnOrDeleted() {
+        //given
+        String clientRefreshToken = "client.refresh.token";
+        UUID userId = UUID.randomUUID();
+        User user = mock(User.class);
+
+        given(jwtProvider.getUserId(clientRefreshToken)).willReturn(userId.toString());
+        given(userService.findById(any(UUID.class), any())).willReturn(user);
+        willThrow(new BadCredentialsException("Incorrect email or password."))
+                .given(user).validateStatusForLogin();
+
+        //when, then
+        assertThatThrownBy(() -> authFacade.reissue(clientRefreshToken))
+                .isInstanceOf(BadCredentialsException.class);
+
+        then(tokenService).should(never()).getRefreshToken(any());
+        then(jwtProvider).should(never()).generateAccessToken(anyString());
     }
 
 }
