@@ -4,6 +4,7 @@ import com.meditrip.common.exception.JwtAuthenticationException;
 import com.meditrip.common.jwt.JwtProvider;
 import com.meditrip.common.util.SecurityUtils;
 import com.meditrip.user.application.dto.request.LoginApplicationRequest;
+import com.meditrip.user.application.dto.request.ResetPasswordApplicationRequest;
 import com.meditrip.user.application.dto.request.SignupApplicationRequest;
 import com.meditrip.user.application.dto.response.TokenResponse;
 import com.meditrip.user.domain.entity.User;
@@ -102,6 +103,18 @@ public class AuthFacade {
             log.info("이메일 인증 토큰이 동일하지 않습니다. 이메일 : [{}]", SecurityUtils.convertToMaskedEmail(email));
             throw new IllegalArgumentException("Email verification token is missing or has expired.");
         }
+    }
+
+    public void resetPassword(ResetPasswordApplicationRequest request) {
+        String email = request.getEmail();
+        String verifiedToken = emailAuthCodeStore.findVerifiedTokenByEmail(email);
+
+        validEmailVerificationToken(verifiedToken, email, request.getVerifiedToken());
+
+        User user = userService.findValidUserByEmail("비밀번호 초기화", request.getEmail());
+        authService.updatePassword(user, request.getPassword());
+
+        emailAuthCodeStore.deleteVerifiedTokenByEmail(email);
     }
 
 }
