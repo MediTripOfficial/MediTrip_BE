@@ -1,70 +1,103 @@
 package com.meditrip.user.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@SpringBootTest
-@ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 class EmailServiceAsyncTest {
 
-    @Autowired
-    private EmailService emailService;
-
-    @MockitoBean
-    private EmailSender emailSender;
-
-    @MockitoBean
+    @Mock
     private EmailAuthCodeStore emailAuthCodeStore;
 
-    @DisplayName("이메일 발송이 느려도 호출자는 기다리지 않고 즉시 반환받는다.")
-    @Test
-    void shouldReturnImmediately_whenEmailSendingIsSlow() {
-        //given
-        doAnswer(invocation -> {
-            Thread.sleep(2000);
-            return null;
-        }).when(emailSender).send(any(), any());
+    @Mock
+    private EmailSender emailSender;
 
-        //when
-        long start = System.currentTimeMillis();
-        emailService.sendVerifyEmail("test@example.com");
-        long elapsed = System.currentTimeMillis() - start;
+    @InjectMocks
+    private EmailAsyncSender emailAsyncSender;
+
+    private final String testEmail = "test@example.com";
+
+    @DisplayName("인증 코드를 생성하고, 저장소에 저장한 뒤 이메일로 발송한다.")
+    @Test
+    void shouldSaveAndSendSameAuthCode_whenSendingSucceeds() {
+        //given, when
+        emailAsyncSender.send(testEmail);
 
         //then
-        assertThat(elapsed).isLessThan(500);
+        ArgumentCaptor<String> codeCaptor = ArgumentCaptor.forClass(String.class);
+        verify(emailAuthCodeStore, times(1)).save(eq(testEmail), codeCaptor.capture());
+        verify(emailSender, times(1)).send(eq(testEmail), codeCaptor.capture());
 
-        await()
-                .atMost(3, TimeUnit.SECONDS)
-                .untilAsserted(() -> verify(emailSender, times(1)).send(any(), any()));
+        String savedCode = codeCaptor.getAllValues().get(0);
+        String sentCode = codeCaptor.getAllValues().get(1);
+        assertThat(savedCode).isEqualTo(sentCode);
     }
 
-    @DisplayName("비동기 발송에 실패하면 별도 스레드에서 저장된 인증 코드가 삭제된다.")
+    @DisplayName("생성된 인증 코드는 6자리이며 영문 대문자와 숫자로만 구성된다.")
     @Test
-    void shouldDeleteSavedAuthCode_whenAsyncSendingFails() {
-        //given
-        doAnswer(invocation -> {
-            throw new RuntimeException("메일 서버 장애");
-        }).when(emailSender).send(any(), any());
-
-        //when
-        emailService.sendVerifyEmail("test@example.com");
+    void shouldGenerateSixDigitAlphanumericCode() {
+        //given, when
+        emailAsyncSender.send(testEmail);
 
         //then
-        await()
-                .atMost(3, TimeUnit.SECONDS)
-                .untilAsserted(() -> verify(emailAuthCodeStore, times(1)).deleteByEmail(any()));
+        ArgumentCaptor<String> codeCaptor = ArgumentCaptor.forClass(String.class);
+        verify(emailSender).send(eq(testEmail), codeCaptor.capture());
+        String authCode = codeCaptor.getValue();
+
+        assertThat(authCode).hasSize(6);
+        assertThat(authCode).matches("^[0-9A-Z]{6}$");
     }
 
+    @DisplayName("호출할 때마다 다른 인증 코드가 생성된다.")
+    @Test
+    void shouldGenerateDifferentCode_whenCalledMultipleTimes() {
+        //given, when
+        emailAsyncSender.send(testEmail);
+        emailAsyncSender.send(testEmail);
+
+        //then
+        ArgumentCaptor<String> codeCaptor = ArgumentCaptor.forClass(String.class);
+        verify(emailSender, times(2)).send(eq(testEmail), codeCaptor.capture());
+
+        String firstCode = codeCaptor.getAllValues().get(0);
+        String secondCode = codeCaptor.getAllValues().get(1);
+        assertThat(firstCode).isNotEqualTo(secondCode);
+    }
+
+    @DisplayName("이메일 발송에 실패하면 예외를 던지지 않고 저장된 인증 코드를 삭제한다.")
+    @Test
+    void shouldDeleteSavedAuthCode_whenSendingFails() {
+        //given
+        willThrow(new RuntimeException("메일 서버 장애")).given(emailSender).send(any(), any());
+
+        //when, then
+        assertDoesNotThrow(() -> emailAsyncSender.send(testEmail));
+
+        verify(emailAuthCodeStore, times(1)).save(eq(testEmail), any());
+        verify(emailAuthCodeStore, times(1)).deleteByEmail(eq(testEmail));
+    }
+
+    @DisplayName("이메일 발송에 성공하면 인증 코드를 삭제하지 않는다.")
+    @Test
+    void shouldNotDeleteAuthCode_whenSendingSucceeds() {
+        //given, when
+        emailAsyncSender.send(testEmail);
+
+        //then
+        verify(emailAuthCodeStore, never()).deleteByEmail(any());
+    }
 }

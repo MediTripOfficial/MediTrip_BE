@@ -1,23 +1,24 @@
 package com.meditrip.user.application;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.meditrip.common.exception.TooManyRequestsException;
+import com.meditrip.common.util.RateLimiter;
 import com.meditrip.user.application.dto.request.VerifyEmailApplicationRequest;
+import com.meditrip.user.domain.exception.EmailSendRateLimitException;
+import java.time.Duration;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,81 +30,74 @@ class EmailServiceTest {
     private EmailAuthCodeStore emailAuthCodeStore;
 
     @Mock
-    private EmailSender emailSender;
+    private EmailAsyncSender emailAsyncSender;
+
+    @Mock
+    private RateLimiter rateLimiter;
 
     @InjectMocks
     private EmailService emailService;
 
     private final String testEmail = "test@example.com";
+    private final String testIp = "1.2.3.4";
 
-    @DisplayName("이메일 발송에 성공하면 인증 코드를 저장하고 동일한 코드로 메일을 발송한다.")
+    @DisplayName("IP, 이메일 쿨다운 모두 통과하면 비동기 발송을 호출한다.")
     @Test
-    void shouldSaveAndSendSameAuthCode_whenSendingSucceeds() {
-        //given, when
-        emailService.sendVerifyEmail(testEmail);
-
-        //then
-        ArgumentCaptor<String> codeCaptor = ArgumentCaptor.forClass(String.class);
-        verify(emailAuthCodeStore, times(1)).save(eq(testEmail), codeCaptor.capture());
-        verify(emailSender, times(1)).send(eq(testEmail), codeCaptor.capture());
-
-        String savedCode = codeCaptor.getAllValues().get(0);
-        String sentCode = codeCaptor.getAllValues().get(1);
-        assertThat(savedCode).isEqualTo(sentCode);
-    }
-
-    @DisplayName("생성된 인증 코드는 6자리이며 영문 대문자와 숫자로만 구성된다.")
-    @Test
-    void shouldGenerateSixDigitAlphanumericCode() {
-        //given, when
-        emailService.sendVerifyEmail(testEmail);
-
-        //then
-        ArgumentCaptor<String> codeCaptor = ArgumentCaptor.forClass(String.class);
-        verify(emailSender).send(eq(testEmail), codeCaptor.capture());
-        String authCode = codeCaptor.getValue();
-
-        assertThat(authCode).hasSize(6);
-        assertThat(authCode).matches("^[0-9A-Z]{6}$");
-    }
-
-    @DisplayName("호출할 때마다 다른 인증 코드가 생성된다.")
-    @Test
-    void shouldGenerateDifferentCode_whenCalledMultipleTimes() {
-        //given, when
-        emailService.sendVerifyEmail(testEmail);
-        emailService.sendVerifyEmail(testEmail);
-
-        //then
-        ArgumentCaptor<String> codeCaptor = ArgumentCaptor.forClass(String.class);
-        verify(emailSender, times(2)).send(eq(testEmail), codeCaptor.capture());
-
-        String firstCode = codeCaptor.getAllValues().get(0);
-        String secondCode = codeCaptor.getAllValues().get(1);
-        assertThat(firstCode).isNotEqualTo(secondCode);
-    }
-
-    @DisplayName("이메일 발송에 실패하면 예외를 던지지 않고 저장된 인증 코드를 삭제한다.")
-    @Test
-    void shouldDeleteSavedAuthCode_whenSendingFails() {
+    void shouldDispatchAsyncSend_whenRateLimitsPass() {
         //given
-        willThrow(new RuntimeException("메일 서버 장애")).given(emailSender).send(any(), any());
+        given(rateLimiter.tryAcquire(any(), anyInt(), any(Duration.class))).willReturn(true);
+        given(emailAuthCodeStore.tryAcquireSendCooldown(testEmail)).willReturn(true);
+
+        //when
+        emailService.sendVerifyEmail(testEmail, testIp);
+
+        //then
+        verify(emailAsyncSender, times(1)).send(eq(testEmail));
+    }
+
+    @DisplayName("IP 요청 횟수 제한에 걸리면 예외를 던지고 이메일 쿨다운은 체크하지 않는다.")
+    @Test
+    void shouldThrowTooManyRequests_whenIpRateLimitExceeded() {
+        //given
+        given(rateLimiter.tryAcquire(any(), anyInt(), any(Duration.class))).willReturn(false);
 
         //when, then
-        assertDoesNotThrow(() -> emailService.sendVerifyEmail(testEmail));
+        assertThatThrownBy(() -> emailService.sendVerifyEmail(testEmail, testIp))
+                .isInstanceOf(TooManyRequestsException.class)
+                .hasMessage("Too many requests. Please try again later.");
 
-        verify(emailAuthCodeStore, times(1)).save(eq(testEmail), any());
-        verify(emailAuthCodeStore, times(1)).deleteByEmail(eq(testEmail));
+        verify(emailAuthCodeStore, never()).tryAcquireSendCooldown(any());
+        verify(emailAsyncSender, never()).send(any());
     }
 
-    @DisplayName("이메일 발송에 성공하면 인증 코드를 삭제하지 않는다.")
+    @DisplayName("IP 제한은 통과했지만 이메일 쿨다운 중이면 예외를 던지고 발송하지 않는다.")
     @Test
-    void shouldNotDeleteAuthCode_whenSendingSucceeds() {
-        //given, when
-        emailService.sendVerifyEmail(testEmail);
+    void shouldThrowEmailSendRateLimit_whenEmailCooldownActive() {
+        //given
+        given(rateLimiter.tryAcquire(any(), anyInt(), any(Duration.class))).willReturn(true);
+        given(emailAuthCodeStore.tryAcquireSendCooldown(testEmail)).willReturn(false);
+
+        //when, then
+        assertThatThrownBy(() -> emailService.sendVerifyEmail(testEmail, testIp))
+                .isInstanceOf(EmailSendRateLimitException.class)
+                .hasMessage("Please wait before requesting another code.");
+
+        verify(emailAsyncSender, never()).send(any());
+    }
+
+    @DisplayName("IP별로 사용한 레이트리밋 키에 해당 IP가 포함된다.")
+    @Test
+    void shouldUseClientIpInRateLimitKey() {
+        //given
+        given(rateLimiter.tryAcquire(any(), anyInt(), any(Duration.class))).willReturn(true);
+        given(emailAuthCodeStore.tryAcquireSendCooldown(testEmail)).willReturn(true);
+
+        //when
+        emailService.sendVerifyEmail(testEmail, testIp);
 
         //then
-        verify(emailAuthCodeStore, never()).deleteByEmail(any());
+        verify(rateLimiter, times(1)).tryAcquire(
+                eq("mediTrip:rateLimit:email:ip:" + testIp), eq(5), eq(Duration.ofMinutes(1)));
     }
 
     @DisplayName("인증 코드가 일치하면 이메일 인증에 성공한다.")

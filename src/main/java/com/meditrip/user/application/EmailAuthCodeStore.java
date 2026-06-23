@@ -15,4 +15,6 @@ public interface EmailAuthCodeStore {
 
     String findVerifiedTokenByEmail(String email);
 
+    boolean tryAcquireSendCooldown(String email);
+
 }

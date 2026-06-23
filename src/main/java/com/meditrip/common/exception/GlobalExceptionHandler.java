@@ -133,4 +133,15 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<ErrorDTO> handleTooManyRequestsException(TooManyRequestsException e) {
+        log.warn(e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(ErrorDTO.builder()
+                        .code(HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase())
+                        .message(e.getMessage())
+                        .build());
+    }
+
 }

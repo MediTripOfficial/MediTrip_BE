@@ -1,13 +1,15 @@
 package com.meditrip.user.application;
 
+import com.meditrip.common.exception.TooManyRequestsException;
+import com.meditrip.common.util.RateLimiter;
 import com.meditrip.common.util.SecurityUtils;
 import com.meditrip.user.application.dto.request.VerifyEmailApplicationRequest;
 import com.meditrip.user.application.dto.response.VerifyEmailResponse;
-import java.security.SecureRandom;
+import com.meditrip.user.domain.exception.EmailSendRateLimitException;
+import java.time.Duration;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,31 +18,25 @@ import org.springframework.stereotype.Service;
 public class EmailService {
 
     private final EmailAuthCodeStore emailAuthCodeStore;
-    private final EmailSender emailSender;
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private final EmailAsyncSender emailAsyncSender;
+    private final RateLimiter rateLimiter;
 
-    @Async("emailExecutor")
-    public void sendVerifyEmail(String email) {
-        String authCode = generateAuthCode();
-        emailAuthCodeStore.save(email, authCode);
-        try {
-            emailSender.send(email, authCode);
-        } catch (Exception e) {
-            log.error("이메일 발송 실패 : {}", SecurityUtils.convertToMaskedEmail(email), e);
-            emailAuthCodeStore.deleteByEmail(email);
-        }
-    }
+    private static final String IP_RATE_LIMIT_PREFIX = "mediTrip:rateLimit:email:ip:";
+    private static final int IP_MAX_REQUEST = 5;
+    private static final Duration IP_WINDOW = Duration.ofMinutes(1);
 
-    private String generateAuthCode() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 6; i++) {
-            if (SECURE_RANDOM.nextBoolean()) {
-                sb.append((char) (SECURE_RANDOM.nextInt(10) + '0'));
-            } else {
-                sb.append((char) (SECURE_RANDOM.nextInt(26) + 'A'));
-            }
+    public void sendVerifyEmail(String email, String clientIp) {
+        if (!rateLimiter.tryAcquire(IP_RATE_LIMIT_PREFIX + clientIp, IP_MAX_REQUEST, IP_WINDOW)) {
+            log.warn("이메일 발송 IP 제한 초과. IP : [{}]", clientIp);
+            throw new TooManyRequestsException("Too many requests. Please try again later.");
         }
-        return sb.toString();
+
+        if (!emailAuthCodeStore.tryAcquireSendCooldown(email)) {
+            log.info("이메일 발송 요청 제한. 이메일 : [{}]", SecurityUtils.convertToMaskedEmail(email));
+            throw new EmailSendRateLimitException("Please wait before requesting another code.");
+        }
+
+        emailAsyncSender.send(email);
     }
 
     public VerifyEmailResponse verifyEmail(VerifyEmailApplicationRequest request) {
