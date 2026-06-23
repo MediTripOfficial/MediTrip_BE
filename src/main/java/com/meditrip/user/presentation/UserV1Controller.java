@@ -5,10 +5,12 @@ import com.meditrip.user.application.EmailService;
 import com.meditrip.user.application.UserFacade;
 import com.meditrip.user.application.UserService;
 import com.meditrip.user.application.dto.response.UserInfoResponse;
+import com.meditrip.user.application.dto.response.VerifyEmailResponse;
 import com.meditrip.user.presentation.dto.request.OnboardingRequest;
 import com.meditrip.user.presentation.dto.request.SendVerifyEmailRequest;
 import com.meditrip.user.presentation.dto.request.UpdatePasswordRequest;
 import com.meditrip.user.presentation.dto.request.UpdateUserInfoRequest;
+import com.meditrip.user.presentation.dto.request.VerifyEmailRequest;
 import com.meditrip.user.presentation.dto.request.WithdrawnRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -99,7 +101,12 @@ public class UserV1Controller {
     @Operation(summary = "이메일 인증 코드 전송")
     public ResponseEntity<Void> sendVerifyEmail(@Valid @RequestBody SendVerifyEmailRequest request) {
         emailService.sendVerifyEmail(request.getEmail());
-        return ResponseEntity.ok(null);
+        return ResponseEntity.accepted().build();
+    }
+
+    @PatchMapping("/email/verification")
+    public ResponseEntity<VerifyEmailResponse> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+        return ResponseEntity.ok(emailService.verifyEmail(request.toApplicationRequest()));
     }
 
 }
