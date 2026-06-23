@@ -105,6 +105,7 @@ public class UserV1Controller {
     }
 
     @PatchMapping("/email/verification")
+    @Operation(summary = "이메일 인증 확인")
     public ResponseEntity<VerifyEmailResponse> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
         return ResponseEntity.ok(emailService.verifyEmail(request.toApplicationRequest()));
     }
