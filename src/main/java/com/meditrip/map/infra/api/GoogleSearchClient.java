@@ -7,6 +7,9 @@ import com.meditrip.map.infra.api.dto.GoogleFindPlaceResponse;
 import com.meditrip.map.infra.api.dto.GoogleNearbySearchRequest;
 import com.meditrip.map.infra.api.dto.GoogleNearbySearchResponse;
 import com.meditrip.map.infra.api.dto.GoogleNearbySearchResponse.GooglePlace;
+import com.meditrip.map.infra.api.dto.GoogleNearbySearchResponse.Period;
+import com.meditrip.map.infra.api.dto.GoogleNearbySearchResponse.Point;
+import com.meditrip.map.infra.api.dto.GoogleNearbySearchResponse.RegularOpeningHours;
 import com.meditrip.map.infra.api.dto.GoogleSearchResponse;
 import com.meditrip.map.infra.api.dto.GoogleSearchResponse.PlaceDetailsResult;
 import java.math.BigDecimal;
@@ -156,9 +159,9 @@ public class GoogleSearchClient implements GoogleSearchApi {
     }
 
     private PlaceResponse toPlaceResponse(GooglePlace place, PlaceType type) {
-        List<String> weekdayDescriptions = place.getRegularOpeningHours() != null
-                ? place.getRegularOpeningHours().getWeekdayDescriptions()
-                : List.of();
+        RegularOpeningHours hours = place.getRegularOpeningHours();
+        String[] weekly = buildWeeklyHours(hours);  // index 0=월 ~ 6=일
+        boolean openNow = hours != null && Boolean.TRUE.equals(hours.getOpenNow());
 
         return PlaceResponse.builder()
                 .placeId(place.getId())
@@ -169,14 +172,51 @@ public class GoogleSearchClient implements GoogleSearchApi {
                 .phoneNumber(place.getNationalPhoneNumber())
                 .googleMapUrl(place.getGoogleMapsUri())
                 .type(type)
-                .openingHours1(getOrNull(weekdayDescriptions, 0))
-                .openingHours2(getOrNull(weekdayDescriptions, 1))
-                .openingHours3(getOrNull(weekdayDescriptions, 2))
-                .openingHours4(getOrNull(weekdayDescriptions, 3))
-                .openingHours5(getOrNull(weekdayDescriptions, 4))
-                .openingHours6(getOrNull(weekdayDescriptions, 5))
-                .openingHours7(getOrNull(weekdayDescriptions, 6))
+                .isOpenNow(openNow)
+                .openingHours1(weekly[0])
+                .openingHours2(weekly[1])
+                .openingHours3(weekly[2])
+                .openingHours4(weekly[3])
+                .openingHours5(weekly[4])
+                .openingHours6(weekly[5])
+                .openingHours7(weekly[6])
                 .build();
+    }
+
+    private String[] buildWeeklyHours(RegularOpeningHours hours) {
+        String[] weekly = new String[7]; // [월,화,수,목,금,토,일]
+        if (hours == null || hours.getPeriods() == null || hours.getPeriods().isEmpty()) {
+            return weekly;
+        }
+
+        if (hours.getPeriods().size() == 1) {
+            Period only = hours.getPeriods().get(0);
+            if (only.getOpen() != null && only.getClose() == null) {
+                for (int i = 0; i < 7; i++) {
+                    weekly[i] = "00:00 ~ 24:00";
+                }
+                return weekly;
+            }
+        }
+
+        for (Period period : hours.getPeriods()) {
+            if (period.getOpen() == null) {
+                continue;
+            }
+            int idx = toMondayBasedIndex(period.getOpen().getDay());
+            String open = formatPoint(period.getOpen());
+            String close = period.getClose() != null ? formatPoint(period.getClose()) : "24:00";
+            weekly[idx] = open + " ~ " + close;
+        }
+        return weekly;
+    }
+
+    private String formatPoint(Point point) {
+        return String.format("%02d:%02d", point.getHour(), point.getMinute());
+    }
+
+    private int toMondayBasedIndex(int googleDay) {
+        return (googleDay + 6) % 7;
     }
 
     private String getOrNull(List<String> list, int index) {
