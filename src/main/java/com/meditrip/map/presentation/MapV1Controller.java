@@ -27,9 +27,6 @@ public class MapV1Controller {
     private static final BigDecimal MIN_LONGITUDE = new BigDecimal("-180");
     private static final BigDecimal MAX_LONGITUDE = new BigDecimal("180");
 
-    private static final BigDecimal DEFAULT_LATITUDE = new BigDecimal("37.5546"); //TODO: 기본 위치 정해지면 변경
-    private static final BigDecimal DEFAULT_LONGITUDE = new BigDecimal("126.9706");
-
     private final MapFacade mapFacade;
 
     @GetMapping
@@ -46,7 +43,7 @@ public class MapV1Controller {
             @RequestParam(required = false) String keyword) {
         UUID userId = UUID.fromString(userDetails.getUserId());
 
-        Coordinates coordinates = resolveCoordinates(lat, lng);
+        Coordinates coordinates = parseUserCoordinates(lat, lng);
         BoundingBox boundingBox = parseBoundingBox(swLat, swLng, neLat, neLng);
         validateRadius(radius);
         validateType(type);
@@ -64,9 +61,9 @@ public class MapV1Controller {
         return ResponseEntity.ok(mapFacade.searchNearbyPlaces(request));
     }
 
-    private Coordinates resolveCoordinates(String latitudeStr, String longitudeStr) {
+    private Coordinates parseUserCoordinates(String latitudeStr, String longitudeStr) {
         if (latitudeStr == null && longitudeStr == null) {
-            return new Coordinates(DEFAULT_LATITUDE, DEFAULT_LONGITUDE);
+            return new Coordinates(null, null);
         }
         if (latitudeStr == null || longitudeStr == null) {
             throw new IllegalArgumentException("Both 'lat' and 'lng' must be provided together.");
@@ -131,10 +128,10 @@ public class MapV1Controller {
 
     record Coordinates(BigDecimal latitude, BigDecimal longitude) {
         Coordinates {
-            if (latitude.compareTo(MIN_LATITUDE) < 0 || latitude.compareTo(MAX_LATITUDE) > 0) {
+            if (latitude != null && (latitude.compareTo(MIN_LATITUDE) < 0 || latitude.compareTo(MAX_LATITUDE) > 0)) {
                 throw new IllegalArgumentException("Invalid latitude. Latitude must be between -90 and 90.");
             }
-            if (longitude.compareTo(MIN_LONGITUDE) < 0 || longitude.compareTo(MAX_LONGITUDE) > 0) {
+            if (longitude != null && (longitude.compareTo(MIN_LONGITUDE) < 0 || longitude.compareTo(MAX_LONGITUDE) > 0)) {
                 throw new IllegalArgumentException("Invalid longitude. Longitude must be between -180 and 180.");
             }
         }

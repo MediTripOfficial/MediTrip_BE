@@ -30,30 +30,38 @@ public class MapFacade {
     private static final String LANG_KO = "ko";
     private static final String LANG_EN = "en";
 
+    private static final BigDecimal DEFAULT_LATITUDE = new BigDecimal("37.5546");   // 서울역, TODO: 기본 위치 정해지면 변경
+    private static final BigDecimal DEFAULT_LONGITUDE = new BigDecimal("126.9706");
+
     private final HaversineSpatialService haversineSpatialService;
     private final GoogleSearchApi googleSearchApi;
     private final PharmacyInfoClient pharmacyInfoClient;
     private final PharmacyOpeningHoursService pharmacyOpeningHoursService;
 
     public List<PlaceResponse> searchNearbyPlaces(SearchNearbyPlacesRequest request) {
-        BigDecimal centerLat;
-        BigDecimal centerLng;
+        BigDecimal searchLat;
+        BigDecimal searchLng;
         int radius;
 
         if (request.hasBoundingBox()) {
             BoundingBox box = request.getBoundingBox();
 
-            centerLat = box.getSwLat().add(box.getNeLat()).divide(BigDecimal.valueOf(2), 7, RoundingMode.HALF_UP);
-            centerLng = box.getSwLng().add(box.getNeLng()).divide(BigDecimal.valueOf(2), 7, RoundingMode.HALF_UP);
+            searchLat = box.getSwLat().add(box.getNeLat()).divide(BigDecimal.valueOf(2), 7, RoundingMode.HALF_UP);
+            searchLng = box.getSwLng().add(box.getNeLng()).divide(BigDecimal.valueOf(2), 7, RoundingMode.HALF_UP);
 
             int diameter = haversineSpatialService.calculateDistanceMeters(box.getNeLat(), box.getNeLng(),
                     box.getSwLat(), box.getSwLng());
             radius = Math.min(diameter / 2, MAX_RADIUS_METERS);
         } else {
-            centerLat = request.getLatitude();
-            centerLng = request.getLongitude();
+            // box도 없고 위치도 없으면 기본 좌표(서울역)
+            searchLat = request.getLatitude() != null ? request.getLatitude() : DEFAULT_LATITUDE;
+            searchLng = request.getLongitude() != null ? request.getLongitude() : DEFAULT_LONGITUDE;
             radius = request.getRadius();
         }
+
+        // 거리 기준점: 실제 위치(lat/lng)가 있으면 그걸 우선, 없으면 검색 중심
+        BigDecimal baseLat = request.getLatitude() != null ? request.getLatitude() : searchLat;
+        BigDecimal baseLng = request.getLongitude() != null ? request.getLongitude() : searchLng;
 
         PlaceType type = resolveType(request.getType());
         LocalDateTime now = LocalDateTime.now(SEOUL);
@@ -61,11 +69,11 @@ public class MapFacade {
         List<PlaceResponse> result = new ArrayList<>();
 
         if (type == PlaceType.PHARMACY || type == PlaceType.ALL) {
-            result.addAll(searchPharmacies(centerLat, centerLng, radius, request.getKeyword(), now));
+            result.addAll(searchPharmacies(searchLat, searchLng, radius, baseLat, baseLng, request.getKeyword(), now));
         }
 
         if (type == PlaceType.CONVENIENCE_STORE || type == PlaceType.ALL) {
-            result.addAll(searchConvenienceStores(centerLat, centerLng, radius, request.getKeyword()));
+            result.addAll(searchConvenienceStores(searchLat, searchLng, radius, baseLat, baseLng, request.getKeyword()));
         }
 
         return result.stream()
@@ -74,14 +82,15 @@ public class MapFacade {
                 .toList();
     }
 
-    private List<PlaceResponse> searchPharmacies(BigDecimal centerLat, BigDecimal centerLng, int radius,
+    private List<PlaceResponse> searchPharmacies(BigDecimal searchLat, BigDecimal searchLng, int radius,
+                                                 BigDecimal baseLat, BigDecimal baseLng,
                                                  String keyword, LocalDateTime now) {
         // 한국어 - 공공 API 매칭용
         List<PlaceResponse> koList = googleSearchApi.searchNearbyPlaces(
-                centerLat, centerLng, radius, PlaceType.PHARMACY, keyword, LANG_KO);
+                searchLat, searchLng, radius, PlaceType.PHARMACY, keyword, LANG_KO);
         // 영어 - 사용자 표시용
         List<PlaceResponse> enList = googleSearchApi.searchNearbyPlaces(
-                centerLat, centerLng, radius, PlaceType.PHARMACY, keyword, LANG_EN);
+                searchLat, searchLng, radius, PlaceType.PHARMACY, keyword, LANG_EN);
 
         Map<String, PlaceResponse> koByPlaceId = koList.stream()
                 .filter(p -> p.getPlaceId() != null)
@@ -90,25 +99,26 @@ public class MapFacade {
         List<PlaceResponse> result = new ArrayList<>();
         for (PlaceResponse en : enList) {
             PlaceResponse ko = koByPlaceId.get(en.getPlaceId());
-            result.add(toPharmacyResponse(en, ko, centerLat, centerLng, now));
+            result.add(toPharmacyResponse(en, ko, baseLat, baseLng, now));
         }
         return result;
     }
 
-    private List<PlaceResponse> searchConvenienceStores(BigDecimal centerLat, BigDecimal centerLng, int radius, String keyword) {
+    private List<PlaceResponse> searchConvenienceStores(BigDecimal searchLat, BigDecimal searchLng, int radius,
+                                                        BigDecimal baseLat, BigDecimal baseLng, String keyword) {
         List<PlaceResponse> enList = googleSearchApi.searchNearbyPlaces(
-                centerLat, centerLng, radius, PlaceType.CONVENIENCE_STORE, keyword, LANG_EN);
+                searchLat, searchLng, radius, PlaceType.CONVENIENCE_STORE, keyword, LANG_EN);
 
         List<PlaceResponse> result = new ArrayList<>();
         for (PlaceResponse en : enList) {
-            result.add(toConvenienceStoreResponse(en, centerLat, centerLng));
+            result.add(toConvenienceStoreResponse(en, baseLat, baseLng));
         }
         return result;
     }
 
-    private PlaceResponse toPharmacyResponse(PlaceResponse en, PlaceResponse ko, BigDecimal centerLat,
-                                             BigDecimal centerLng, LocalDateTime now) {
-        int distance = calculateDistance(en, centerLat, centerLng);
+    private PlaceResponse toPharmacyResponse(PlaceResponse en, PlaceResponse ko, BigDecimal baseLat,
+                                             BigDecimal baseLng, LocalDateTime now) {
+        int distance = calculateDistance(en, baseLat, baseLng);
 
         PharmacyItem item = null;
         if (ko != null) {
@@ -155,8 +165,8 @@ public class MapFacade {
                 .build();
     }
 
-    private PlaceResponse toConvenienceStoreResponse(PlaceResponse en, BigDecimal centerLat, BigDecimal centerLng) {
-        int distance = calculateDistance(en, centerLat, centerLng);
+    private PlaceResponse toConvenienceStoreResponse(PlaceResponse en, BigDecimal baseLat, BigDecimal baseLng) {
+        int distance = calculateDistance(en, baseLat, baseLng);
 
         return PlaceResponse.builder()
                 .placeId(en.getPlaceId())
@@ -180,9 +190,9 @@ public class MapFacade {
                 .build();
     }
 
-    private int calculateDistance(PlaceResponse place, BigDecimal centerLat, BigDecimal centerLng) {
+    private int calculateDistance(PlaceResponse place, BigDecimal baseLat, BigDecimal baseLng) {
         return haversineSpatialService.calculateDistanceMeters(
-                centerLat, centerLng,
+                baseLat, baseLng,
                 BigDecimal.valueOf(place.getLatitude()), BigDecimal.valueOf(place.getLongitude()));
     }
 
