@@ -1,5 +1,6 @@
 package com.meditrip.medicine.domain.entity;
 
+import com.meditrip.common.domain.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,7 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
-public class Medicine {
+public class Medicine extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,5 +47,6 @@ public class Medicine {
     private String seeDoctorKo;
     private String sourceUrl;
     private String imageUrl;
+    private String countryCode;
 
 }
