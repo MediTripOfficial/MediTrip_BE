@@ -22,3 +22,21 @@ email:
   google:
     email: test@test.com
     password: asdfqwerzxcv
+
+google:
+  api:
+    key: test-dummy-key
+    find-place:
+      url-prefix: http://test
+      url-params: "&key="
+    detail:
+      url-prefix: http://test
+      url-params: "&key="
+    nearby-search:
+      url: http://test
+      field-mask: places.id
+
+pharmacy:
+  api:
+    key: test-dummy-key
+    url: http://test
