@@ -124,6 +124,7 @@ jobs:
             EMAIL_GOOGLE_EMAIL=${{ secrets.EMAIL_GOOGLE_EMAIL }}
             EMAIL_GOOGLE_PASSWORD=${{ secrets.EMAIL_GOOGLE_PASSWORD }}
             GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_KEY }}
+            PHARMACY_API_KEY=${{ secrets.PHARMACY_API_KEY }}
             EOF
 
             # 최신 이미지 pull
