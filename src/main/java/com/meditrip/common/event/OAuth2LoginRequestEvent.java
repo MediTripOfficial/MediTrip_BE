@@ -10,6 +10,7 @@ public class OAuth2LoginRequestEvent {
     private String userId;
     private String userStatus;
     private boolean handled = false;
+    private String failureReason;
 
     public OAuth2LoginRequestEvent(String email, String name, OAuth2Provider provider) {
         this.email = email;
@@ -33,6 +34,15 @@ public class OAuth2LoginRequestEvent {
         this.userId = userId;
         this.userStatus = userStatus;
         this.handled = true;
+    }
+
+    public void setFailure(String failureReason) {
+        this.failureReason = failureReason;
+        this.handled = false;
+    }
+
+    public String getFailureReason() {
+        return failureReason;
     }
 
     public String getUserId() {
