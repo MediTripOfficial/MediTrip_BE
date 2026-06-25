@@ -123,6 +123,7 @@ jobs:
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
             EMAIL_GOOGLE_EMAIL=${{ secrets.EMAIL_GOOGLE_EMAIL }}
             EMAIL_GOOGLE_PASSWORD=${{ secrets.EMAIL_GOOGLE_PASSWORD }}
+            GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_KEY }}
             EOF
 
             # 최신 이미지 pull
