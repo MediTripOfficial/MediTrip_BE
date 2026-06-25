@@ -47,3 +47,8 @@ jwt:
   access-token-type: "access"
   refresh-token-type: "refresh"
   redis-prefix-refresh: "mediTrip:refreshToken:"
+
+email:
+  google:
+    email: ${EMAIL_GOOGLE_EMAIL}
+    password: ${EMAIL_GOOGLE_PASSWORD}

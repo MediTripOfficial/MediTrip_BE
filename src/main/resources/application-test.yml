@@ -16,3 +16,9 @@ spring:
 
 jwt:
   secret: testteasfjlasjfl123182739874397akjljsdfasdfasfwearqwe2345365373524gfadfdasdfasdf21324567afasdfasdfadft5fasdf
+
+
+email:
+  google:
+    email: test@test.com
+    password: asdfqwerzxcv

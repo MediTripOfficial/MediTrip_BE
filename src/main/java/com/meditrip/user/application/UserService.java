@@ -5,6 +5,7 @@ import com.meditrip.common.util.SecurityUtils;
 import com.meditrip.user.application.dto.response.UserInfoResponse;
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.entity.enums.UserStatus;
+import com.meditrip.user.domain.exception.UserNotFoundException;
 import com.meditrip.user.domain.repository.UserAllergyRepository;
 import com.meditrip.user.domain.repository.UserConditionRepository;
 import com.meditrip.user.domain.repository.UserRepository;
@@ -93,6 +94,18 @@ public class UserService {
                 throw new DuplicateKeyException("Nickname already exists.");
             }
         });
+    }
+
+    @Transactional(readOnly = true)
+    public User findValidUserByEmail(String method, String email) {
+        String maskedEmail = SecurityUtils.convertToMaskedEmail(email);
+
+        return userRepository.findByEmailAndStatusIn(email,
+                        List.of(UserStatus.ACTIVE, UserStatus.GUEST))
+                .orElseThrow(() -> {
+                    log.info("{} 유저 정보가 존재하지 않습니다. Email : [{}]", method, maskedEmail);
+                    return new UserNotFoundException();
+                });
     }
 
 }

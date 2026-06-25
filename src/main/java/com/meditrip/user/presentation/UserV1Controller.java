@@ -1,14 +1,20 @@
 package com.meditrip.user.presentation;
 
 import com.meditrip.common.jwt.CustomUserDetails;
+import com.meditrip.common.util.IpAddressUtil;
+import com.meditrip.user.application.EmailService;
 import com.meditrip.user.application.UserFacade;
 import com.meditrip.user.application.UserService;
 import com.meditrip.user.application.dto.response.UserInfoResponse;
+import com.meditrip.user.application.dto.response.VerifyEmailResponse;
 import com.meditrip.user.presentation.dto.request.OnboardingRequest;
+import com.meditrip.user.presentation.dto.request.SendVerifyEmailRequest;
 import com.meditrip.user.presentation.dto.request.UpdatePasswordRequest;
 import com.meditrip.user.presentation.dto.request.UpdateUserInfoRequest;
+import com.meditrip.user.presentation.dto.request.VerifyEmailRequest;
 import com.meditrip.user.presentation.dto.request.WithdrawnRequest;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +37,7 @@ public class UserV1Controller {
 
     private final UserService userService;
     private final UserFacade userFacade;
+    private final EmailService emailService;
 
     @GetMapping("/email/check")
     @Operation(summary = "이메일 중복 검사")
@@ -90,6 +97,21 @@ public class UserV1Controller {
                                                        @Valid @RequestBody OnboardingRequest onboardingRequest) {
         return ResponseEntity.ok(userFacade.onboarding(UUID.fromString(userDetails.getUserId()),
                 onboardingRequest.toApplicationRequest()));
+    }
+
+    @PostMapping("/email/verification")
+    @Operation(summary = "이메일 인증 코드 전송")
+    public ResponseEntity<Void> sendVerifyEmail(@Valid @RequestBody SendVerifyEmailRequest request,
+                                                HttpServletRequest httpRequest) {
+        String clientIp = IpAddressUtil.getClientIp(httpRequest);
+        emailService.sendVerifyEmail(request.getEmail(), clientIp);
+        return ResponseEntity.accepted().build();
+    }
+
+    @PatchMapping("/email/verification")
+    @Operation(summary = "이메일 인증 확인")
+    public ResponseEntity<VerifyEmailResponse> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+        return ResponseEntity.ok(emailService.verifyEmail(request.toApplicationRequest()));
     }
 
 }

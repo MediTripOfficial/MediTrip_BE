@@ -80,8 +80,12 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         eventPublisher.publishEvent(loginEvent);
 
         if (!loginEvent.isHandled()) {
-            log.error("OAuth2 로그인 이벤트가 처리되지 않았습니다. email: [{}]", principal.getUserInfo().getEmail());
-            return buildErrorUrl(redirectUri, "Login processing failed");
+            String reason = loginEvent.getFailureReason() != null
+                    ? loginEvent.getFailureReason()
+                    : "login_failed";
+            log.warn("OAuth2 로그인 처리 거부. email: [{}], reason: [{}]",
+                    principal.getUserInfo().getEmail(), reason);
+            return buildErrorUrl(redirectUri, reason);
         }
 
         String userId = loginEvent.getUserId();

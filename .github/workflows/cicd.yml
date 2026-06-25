@@ -121,6 +121,8 @@ jobs:
             TAG=${{ github.sha }}
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            EMAIL_GOOGLE_EMAIL=${{ secrets.EMAIL_GOOGLE_EMAIL }}
+            EMAIL_GOOGLE_PASSWORD=${{ secrets.EMAIL_GOOGLE_PASSWORD }}
             EOF
 
             # 최신 이미지 pull

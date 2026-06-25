@@ -3,7 +3,6 @@ package com.meditrip.user.application.dto.request;
 import com.meditrip.user.domain.entity.enums.Gender;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,7 +24,7 @@ public class SignupApplicationRequest {
     private List<String> underlyingDisease;
     private List<String> allergies;
     private boolean isMarketingTermsAgreed;
-    private UUID verifiedToken;
+    private String verifiedToken;
     private String profileImg;
 
 }
