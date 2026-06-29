@@ -49,6 +49,8 @@ public class Medicine extends BaseEntity {
     private String imageUrl;
     private String countryCode;
 
+    private Integer severityTier;
+
     @Column(name = "source_url", columnDefinition = "TEXT")
     private String sourceUrl;
 
