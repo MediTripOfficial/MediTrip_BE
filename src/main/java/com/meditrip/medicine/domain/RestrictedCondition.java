@@ -8,40 +8,44 @@ import lombok.Getter;
 public enum RestrictedCondition {
 
     PREGNANCY_BREASTFEEDING(
-            Set.of("pregnancy", "breastfeeding", "nursing", "lactation", "임신", "수유"),
+            Set.of("pregnancy", "Pregnancy / Breastfeeding", "Pregnancy/Breastfeeding", "pregnancy / breastfeeding",
+                    "pregnancy/breastfeeding", "breastfeeding", "nursing", "lactation", "임신", "수유"),
             List.of("Ibuprofen", "Dexibuprofen", "Ketoprofen", "Piroxicam", "Diclofenac",
                     "Methyl salicylate", "Glycol salicylate", "Aspirin", "Naproxen",
                     "Isopropylantipyrine", "Caffeine", "Retinol", "Warfarin")
     ),
 
     CARDIOVASCULAR_DISEASE(
-            Set.of("cardiovascular", "heart disease", "hypertension", "심혈관", "고혈압", "심장"),
+            Set.of("Cardiovascular Disease", "cardiovascular disease", "cardiovascular", "heart disease",
+                    "hypertension", "심혈관", "고혈압", "심장"),
             List.of("Ibuprofen", "Dexibuprofen", "Ketoprofen", "Piroxicam", "Diclofenac",
                     "Naproxen", "Aspirin", "Caffeine", "Sodium bicarbonate", "Sodium alginate",
                     "Calcium carbonate")
     ),
 
     DIABETES(
-            Set.of("diabetes", "diabetic", "당뇨"),
+            Set.of("Diabetes", "diabetes", "diabetic", "당뇨"),
             List.of("Sugar-containing syrup", "Sugar-containing liquid", "High-sugar herbal liquid", "Caffeine")
     ),
 
     ASTHMA(
-            Set.of("asthma", "천식"),
+            Set.of("Asthma", "asthma", "천식"),
             List.of("Ibuprofen", "Dexibuprofen", "Ketoprofen", "Piroxicam", "Diclofenac",
                     "Naproxen", "Aspirin", "Methyl salicylate", "Glycol salicylate")
     ),
 
     LIVER_KIDNEY_DISEASE(
-            Set.of("liver", "kidney", "renal", "hepatic", "간", "신장"),
+            Set.of("Liver / Kidney Disease", "Liver/Kidney Disease", "liver / kidney disease", "liver/kidney disease",
+                    "liver", "kidney", "renal", "hepatic", "간", "신장"),
             List.of("Acetaminophen", "Ibuprofen", "Dexibuprofen", "Ketoprofen", "Piroxicam",
                     "Diclofenac", "Naproxen", "Aspirin", "Sodium bicarbonate", "Sodium alginate",
                     "Calcium carbonate", "Aluminum phosphate", "Magnesium hydroxide")
     ),
 
     GASTRIC_ULCER_GI_BLEEDING(
-            Set.of("gastric ulcer", "gastrointestinal bleeding", "gi bleeding", "peptic ulcer",
-                    "위궤양", "소화성 출혈", "위장출혈"),
+            Set.of("History of Gastric Ulcer or Gastrointestinal Bleeding",
+                    "history of gastric ulcer or gastrointestinal bleeding", "gastric ulcer",
+                    "gastrointestinal bleeding", "gi bleeding", "peptic ulcer", "위궤양", "소화성 출혈", "위장출혈"),
             List.of("Ibuprofen", "Dexibuprofen", "Ketoprofen", "Piroxicam", "Diclofenac",
                     "Naproxen", "Aspirin", "Methyl salicylate", "Glycol salicylate",
                     "Isopropylantipyrine", "Caffeine", "Warfarin")
