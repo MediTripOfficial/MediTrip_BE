@@ -26,6 +26,6 @@ public class MedicineIngredients extends BaseEntity {
 
     private Long medicineId;
     private Long ingredientId;
-    private int amount;
+    private String amount;
 
 }

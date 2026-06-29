@@ -1,6 +1,7 @@
 package com.meditrip.medicine.domain.entity;
 
 import com.meditrip.common.domain.BaseEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,9 +31,9 @@ public class Medicine extends BaseEntity {
     private String manufacturer_en;
     private Boolean isConvenienceStore;
     private Boolean isChildSafe;
-    private String usage_en;
+    private String usageEn;
     private String dosage;
-    private String interval;
+    private String dosageInterval;
     private String maxLimit;
     private String caution;
     private String cautionDetailEn;
@@ -45,8 +46,10 @@ public class Medicine extends BaseEntity {
     private String drugInteractionsKo;
     private String seeDoctorEn;
     private String seeDoctorKo;
-    private String sourceUrl;
     private String imageUrl;
     private String countryCode;
+
+    @Column(name = "source_url", columnDefinition = "TEXT")
+    private String sourceUrl;
 
 }

@@ -2,6 +2,8 @@ package com.meditrip.medicine.domain.entity;
 
 import com.meditrip.common.domain.BaseEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -25,10 +27,12 @@ public class Hashtag extends BaseEntity {
     private Long id;
 
     private String name;
+
+    @Enumerated(EnumType.STRING)
     private HashtagType type;
 
-}
+    public enum HashtagType {
+        DISEASE, EFFICACY
+    }
 
-enum HashtagType {
-    DISEASE, EFFICACY
 }
