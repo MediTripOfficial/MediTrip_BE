@@ -14,6 +14,7 @@ import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.repository.UserAllergyRepository;
 import com.meditrip.user.domain.repository.UserConditionRepository;
 import com.meditrip.user.domain.repository.UserRepository;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -91,13 +92,10 @@ public class SymptomRecommendationService {
         List<SimilarDrugResponse> similarDrugs =
                 buildSimilarDrugs(medicinesForSimilarDrugs, bundle.ingredientsByMedicineId());
 
-        List<Long> medicineIds = sortedMedicines.stream().map(Medicine::getId).toList();
-        List<String> hashtags = symptomMedicineQueryRepository.findDiseaseHashtagNamesByMedicineIds(medicineIds);
-
         return SymptomResponse.builder()
                 .name(symptomCode.getMajorNameEn())
                 .description(symptomCode.getSubNameEn())
-                .hashtag(hashtags)
+                .hashtag(new ArrayList<>()) //TODO : 기획팀 답변 받은 후 수정
                 .similarDrugs(similarDrugs)
                 .medicines(medicineResponses)
                 .build();
