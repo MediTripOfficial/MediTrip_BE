@@ -34,7 +34,7 @@ public class MedicineQueryRepository {
         List<MedicineInfo.Ingredient> ingredients = queryFactory
                 .select(Projections.constructor(
                         MedicineInfo.Ingredient.class,
-                        QIngredient.ingredient.name_en,
+                        QIngredient.ingredient.nameEn,
                         QMedicineIngredients.medicineIngredients.amount))
                 .from(QMedicineIngredients.medicineIngredients)
                 .join(QIngredient.ingredient)
@@ -71,9 +71,9 @@ public class MedicineQueryRepository {
 
         MedicineInfo medicineInfo = MedicineInfo.builder()
                 .id(medicine.getId())
-                .name(medicine.getName_en())
+                .name(medicine.getNameEn())
                 .imageUrl(medicine.getImageUrl())
-                .manufacturer(medicine.getManufacturer_en())
+                .manufacturer(medicine.getManufacturerEn())
                 .ingredients(ingredients)
                 .diseaseHashtags(diseaseHashtags)
                 .efficacyHashtags(efficacyHashtags)

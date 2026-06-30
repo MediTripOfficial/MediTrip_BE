@@ -72,10 +72,10 @@ class MedicineV1ControllerGetMedicineInfoTest extends ControllerTestSupport {
     void shouldReturnMedicineInfo_whenMedicineExists() throws Exception {
         //given
         Medicine medicine = medicineRepository.save(Medicine.builder()
-                .name_ko("타이레놀")
-                .name_en("Tylenol")
-                .manufacturer_ko("존슨앤드존슨")
-                .manufacturer_en("Johnson & Johnson")
+                .nameKo("타이레놀")
+                .nameEn("Tylenol")
+                .manufacturerKo("존슨앤드존슨")
+                .manufacturerEn("Johnson & Johnson")
                 .isConvenienceStore(true)
                 .isChildSafe(true)
                 .dosage("1 tablet")
@@ -90,8 +90,8 @@ class MedicineV1ControllerGetMedicineInfoTest extends ControllerTestSupport {
                 .build());
 
         Ingredient ingredient = ingredientRepository.save(Ingredient.builder()
-                .name_en("Acetaminophen")
-                .name_ko("아세트아미노펜")
+                .nameEn("Acetaminophen")
+                .nameKo("아세트아미노펜")
                 .build());
 
         medicineIngredientsRepository.save(MedicineIngredients.builder()

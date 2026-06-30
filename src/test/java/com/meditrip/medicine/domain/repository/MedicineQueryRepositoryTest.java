@@ -41,10 +41,10 @@ class MedicineQueryRepositoryTest {
     void shouldReturnFullMedicineInfo_whenMedicineIsSoldAtConvenienceStore() {
         //given
         Medicine medicine = Medicine.builder()
-                .name_ko("타이레놀")
-                .name_en("Tylenol")
-                .manufacturer_ko("존슨앤드존슨")
-                .manufacturer_en("Johnson & Johnson")
+                .nameKo("타이레놀")
+                .nameEn("Tylenol")
+                .manufacturerKo("존슨앤드존슨")
+                .manufacturerEn("Johnson & Johnson")
                 .isConvenienceStore(true)
                 .isChildSafe(true)
                 .dosage("1 tablet")
@@ -63,8 +63,8 @@ class MedicineQueryRepositoryTest {
         entityManager.persist(medicine); // IDENTITY 전략이라 persist 시점에 id가 채워짐
 
         Ingredient ingredient = Ingredient.builder()
-                .name_en("Acetaminophen")
-                .name_ko("아세트아미노펜")
+                .nameEn("Acetaminophen")
+                .nameKo("아세트아미노펜")
                 .build();
         entityManager.persist(ingredient);
 
@@ -130,10 +130,10 @@ class MedicineQueryRepositoryTest {
     void shouldReturnPharmacyOnly_whenMedicineIsNotSoldAtConvenienceStore() {
         //given
         Medicine medicine = Medicine.builder()
-                .name_ko("처방약")
-                .name_en("Prescription Drug")
-                .manufacturer_ko("제약사")
-                .manufacturer_en("Pharma Co")
+                .nameKo("처방약")
+                .nameEn("Prescription Drug")
+                .manufacturerKo("제약사")
+                .manufacturerEn("Pharma Co")
                 .isConvenienceStore(false)
                 .isChildSafe(false)
                 .countryCode("US")
@@ -158,8 +158,8 @@ class MedicineQueryRepositoryTest {
     void shouldReturnPharmacyOnly_whenIsConvenienceStoreIsNull() {
         //given
         Medicine medicine = Medicine.builder()
-                .name_en("Unknown Drug")
-                .manufacturer_en("Unknown Co")
+                .nameEn("Unknown Drug")
+                .manufacturerEn("Unknown Co")
                 .isConvenienceStore(null)
                 .countryCode("US")
                 .build();

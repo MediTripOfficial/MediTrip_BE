@@ -174,8 +174,8 @@ public class SymptomRecommendationService {
 
         return MedicineSummaryResponse.builder()
                 .id(medicine.getId())
-                .productNameEng(medicine.getName_en())
-                .manufacturer(medicine.getManufacturer_en())
+                .productNameEng(medicine.getNameEn())
+                .manufacturer(medicine.getManufacturerEn())
                 .activeIngredientsEng(ingredientNames)
                 .purchaseLocation(purchaseLocation)
                 .imageUrl(medicine.getImageUrl())
@@ -194,8 +194,8 @@ public class SymptomRecommendationService {
 
         return representativeByIngredientSet.entrySet().stream()
                 .map(entry -> SimilarDrugResponse.builder()
-                        .productNameEng(entry.getValue().getName_en())
-                        .manufacturer(entry.getValue().getManufacturer_en())
+                        .productNameEng(entry.getValue().getNameEn())
+                        .manufacturer(entry.getValue().getManufacturerEn())
                         .activeIngredientsEng(entry.getKey())
                         .build())
                 .toList();

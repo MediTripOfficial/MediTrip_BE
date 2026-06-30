@@ -57,8 +57,8 @@ class SymptomMedicineQueryRepositoryTest {
 
     private Medicine persistMedicine(String nameEn) {
         Medicine medicine = Medicine.builder()
-                .name_en(nameEn)
-                .manufacturer_en("Test Manufacturer")
+                .nameEn(nameEn)
+                .manufacturerEn("Test Manufacturer")
                 .countryCode("KR")
                 .isConvenienceStore(true)
                 .severityTier(1)
@@ -68,8 +68,8 @@ class SymptomMedicineQueryRepositoryTest {
 
     private Ingredient persistIngredient(String nameEn) {
         Ingredient ingredient = Ingredient.builder()
-                .name_en(nameEn)
-                .name_ko(nameEn)
+                .nameEn(nameEn)
+                .nameKo(nameEn)
                 .build();
         return ingredientRepository.save(ingredient);
     }

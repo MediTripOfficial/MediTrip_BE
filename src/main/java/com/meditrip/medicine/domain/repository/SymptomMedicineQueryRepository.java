@@ -47,7 +47,7 @@ public class SymptomMedicineQueryRepository {
         }
 
         List<Tuple> rows = queryFactory
-                .select(QMedicineIngredients.medicineIngredients.medicineId, QIngredient.ingredient.name_en)
+                .select(QMedicineIngredients.medicineIngredients.medicineId, QIngredient.ingredient.nameEn)
                 .from(QMedicineIngredients.medicineIngredients)
                 .join(QIngredient.ingredient)
                 .on(QMedicineIngredients.medicineIngredients.ingredientId.eq(QIngredient.ingredient.id))
@@ -57,7 +57,7 @@ public class SymptomMedicineQueryRepository {
         Map<Long, List<String>> result = new LinkedHashMap<>();
         for (Tuple row : rows) {
             Long medicineId = row.get(QMedicineIngredients.medicineIngredients.medicineId);
-            String ingredientName = row.get(QIngredient.ingredient.name_en);
+            String ingredientName = row.get(QIngredient.ingredient.nameEn);
             result.computeIfAbsent(medicineId, key -> new ArrayList<>()).add(ingredientName);
         }
         return result;

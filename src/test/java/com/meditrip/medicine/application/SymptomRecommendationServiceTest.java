@@ -2,7 +2,6 @@ package com.meditrip.medicine.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -55,8 +54,8 @@ class SymptomRecommendationServiceTest {
                                      Boolean convenienceStore, Integer severityTier) {
         return Medicine.builder()
                 .id(id)
-                .name_en(nameEn)
-                .manufacturer_en(manufacturer)
+                .nameEn(nameEn)
+                .manufacturerEn(manufacturer)
                 .countryCode(countryCode)
                 .isConvenienceStore(convenienceStore)
                 .severityTier(severityTier)
@@ -91,9 +90,6 @@ class SymptomRecommendationServiceTest {
                         1L, List.of("Acetaminophen"),
                         2L, List.of("Ibuprofen"),
                         3L, List.of("Acetaminophen", "Caffeine")));
-        // targetTier=2 이므로 거리 0인 ibuprofenX(2), geworin(3)이 먼저, tylenol(1)이 마지막
-        given(symptomMedicineQueryRepository.findDiseaseHashtagNamesByMedicineIds(List.of(2L, 3L, 1L)))
-                .willReturn(List.of("Headache", "Fever"));
 
         // secondaryCode=12(MUSCLE_JOINT_PAIN, baseScore=70, |70-65|=5)가 가장 가까움
         Medicine coldPas = medicine(4L, "ColdPas", "ZZZ", "KR", true, 1);
@@ -101,8 +97,6 @@ class SymptomRecommendationServiceTest {
                 .willReturn(List.of(coldPas));
         given(symptomMedicineQueryRepository.findIngredientNamesByMedicineIds(List.of(4L)))
                 .willReturn(Map.of(4L, List.of("Menthol")));
-        given(symptomMedicineQueryRepository.findDiseaseHashtagNamesByMedicineIds(List.of(4L)))
-                .willReturn(List.of("Muscle pain"));
 
         //when
         SymptomRecommendationResponse response = symptomRecommendationService.recommend(request, userId);
@@ -111,7 +105,6 @@ class SymptomRecommendationServiceTest {
         SymptomResponse primary = response.getResult().getPrimarySymptom();
         assertThat(primary.getName()).isEqualTo("Fever, Pain & Inflammation");
         assertThat(primary.getDescription()).isEqualTo("General & Internal Pain");
-        assertThat(primary.getHashtag()).containsExactly("Headache", "Fever");
 
         //medicines: tier 거리(0,0,1) + id 오름차순으로 정렬 -> [ibuprofenX(2), geworin(3), tylenol(1)]
         List<MedicineSummaryResponse> medicines = primary.getMedicines();
@@ -140,7 +133,6 @@ class SymptomRecommendationServiceTest {
         assertThat(secondary).isNotNull();
         assertThat(secondary.getName()).isEqualTo("Fever, Pain & Inflammation");
         assertThat(secondary.getDescription()).isEqualTo("Muscle & Joint Pain");
-        assertThat(secondary.getHashtag()).containsExactly("Muscle pain");
         assertThat(secondary.getMedicines()).hasSize(1);
         assertThat(secondary.getMedicines().get(0).getId()).isEqualTo(4L);
         assertThat(secondary.getMedicines().get(0).getPurchaseLocation()).containsExactly("store", "pharmacy");
@@ -173,8 +165,6 @@ class SymptomRecommendationServiceTest {
         given(symptomMedicineQueryRepository.findMedicinesBySymptomCode(61)).willReturn(List.of(vitaminC));
         given(symptomMedicineQueryRepository.findIngredientNamesByMedicineIds(List.of(5L)))
                 .willReturn(Map.of(5L, List.of("Vitamin C")));
-        given(symptomMedicineQueryRepository.findDiseaseHashtagNamesByMedicineIds(List.of(5L)))
-                .willReturn(List.of("Fatigue"));
 
         //when
         SymptomRecommendationResponse response = symptomRecommendationService.recommend(request, userId);
@@ -205,7 +195,6 @@ class SymptomRecommendationServiceTest {
 
         given(symptomMedicineQueryRepository.findMedicinesBySymptomCode(51)).willReturn(List.of());
         given(symptomMedicineQueryRepository.findIngredientNamesByMedicineIds(List.of())).willReturn(Map.of());
-        given(symptomMedicineQueryRepository.findDiseaseHashtagNamesByMedicineIds(List.of())).willReturn(List.of());
 
         //when
         SymptomRecommendationResponse response = symptomRecommendationService.recommend(request, userId);
@@ -242,8 +231,6 @@ class SymptomRecommendationServiceTest {
                 .willReturn(Map.of(
                         6L, List.of("Sugar-containing syrup"),
                         7L, List.of("Antacid")));
-        given(symptomMedicineQueryRepository.findDiseaseHashtagNamesByMedicineIds(List.of(7L)))
-                .willReturn(List.of("Indigestion"));
 
         //when
         SymptomRecommendationResponse response = symptomRecommendationService.recommend(request, userId);
@@ -279,8 +266,6 @@ class SymptomRecommendationServiceTest {
                 .willReturn(Map.of(
                         8L, List.of("Penicillin"),
                         9L, List.of("Povidone iodine")));
-        given(symptomMedicineQueryRepository.findDiseaseHashtagNamesByMedicineIds(List.of(9L)))
-                .willReturn(List.of("Eye irritation"));
 
         //when
         SymptomRecommendationResponse response = symptomRecommendationService.recommend(request, userId);
@@ -323,8 +308,6 @@ class SymptomRecommendationServiceTest {
                 .willReturn(List.of(tier1Medicine, tier2Medicine, tier3Medicine));
         given(symptomMedicineQueryRepository.findIngredientNamesByMedicineIds(List.of(100L, 200L, 300L)))
                 .willReturn(Map.of(100L, List.of("A"), 200L, List.of("B"), 300L, List.of("C")));
-        given(symptomMedicineQueryRepository.findDiseaseHashtagNamesByMedicineIds(anyList()))
-                .willReturn(List.of());
 
         //when
         SymptomRecommendationResponse response = symptomRecommendationService.recommend(request, userId);
@@ -362,8 +345,6 @@ class SymptomRecommendationServiceTest {
                         1L, List.of("X"),
                         2L, List.of("X"),
                         3L, List.of("Y")));
-        given(symptomMedicineQueryRepository.findDiseaseHashtagNamesByMedicineIds(List.of(1L, 2L, 3L)))
-                .willReturn(List.of());
 
         //when
         SymptomRecommendationResponse response = symptomRecommendationService.recommend(request, userId);
@@ -398,8 +379,6 @@ class SymptomRecommendationServiceTest {
         given(symptomMedicineQueryRepository.findMedicinesBySymptomCode(61)).willReturn(List.of(usMedicine));
         given(symptomMedicineQueryRepository.findIngredientNamesByMedicineIds(List.of(1L)))
                 .willReturn(Map.of(1L, List.of("X")));
-        given(symptomMedicineQueryRepository.findDiseaseHashtagNamesByMedicineIds(List.of(1L)))
-                .willReturn(List.of());
 
         //when
         SymptomRecommendationResponse response = symptomRecommendationService.recommend(request, userId);
@@ -433,8 +412,6 @@ class SymptomRecommendationServiceTest {
                 .willReturn(List.of(usMedicine, krMedicine));
         given(symptomMedicineQueryRepository.findIngredientNamesByMedicineIds(List.of(1L, 2L)))
                 .willReturn(Map.of(1L, List.of("X"), 2L, List.of("Y")));
-        given(symptomMedicineQueryRepository.findDiseaseHashtagNamesByMedicineIds(List.of(1L, 2L)))
-                .willReturn(List.of());
 
         //when
         SymptomRecommendationResponse response = symptomRecommendationService.recommend(request, userId);
@@ -464,8 +441,6 @@ class SymptomRecommendationServiceTest {
                 .willReturn(List.of(unknownConvenience));
         given(symptomMedicineQueryRepository.findIngredientNamesByMedicineIds(List.of(1L)))
                 .willReturn(Map.of(1L, List.of("X")));
-        given(symptomMedicineQueryRepository.findDiseaseHashtagNamesByMedicineIds(List.of(1L)))
-                .willReturn(List.of());
 
         //when
         SymptomRecommendationResponse response = symptomRecommendationService.recommend(request, userId);
@@ -497,8 +472,6 @@ class SymptomRecommendationServiceTest {
                 .willReturn(List.of(nullTierMedicine, tier3Medicine));
         given(symptomMedicineQueryRepository.findIngredientNamesByMedicineIds(List.of(1L, 2L)))
                 .willReturn(Map.of(1L, List.of("X"), 2L, List.of("Y")));
-        given(symptomMedicineQueryRepository.findDiseaseHashtagNamesByMedicineIds(List.of(1L, 2L)))
-                .willReturn(List.of());
 
         //when
         SymptomRecommendationResponse response = symptomRecommendationService.recommend(request, userId);
@@ -529,8 +502,6 @@ class SymptomRecommendationServiceTest {
         given(symptomMedicineQueryRepository.findMedicinesBySymptomCode(61)).willReturn(List.of(usMedicine));
         given(symptomMedicineQueryRepository.findIngredientNamesByMedicineIds(List.of(1L)))
                 .willReturn(Map.of(1L, List.of("X")));
-        given(symptomMedicineQueryRepository.findDiseaseHashtagNamesByMedicineIds(List.of(1L)))
-                .willReturn(List.of());
 
         //when
         SymptomRecommendationResponse response = symptomRecommendationService.recommend(request, userId);

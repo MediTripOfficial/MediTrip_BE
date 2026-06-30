@@ -24,7 +24,7 @@ public class Ingredient extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name_en;
-    private String name_ko;
+    private String nameEn;
+    private String nameKo;
 
 }
