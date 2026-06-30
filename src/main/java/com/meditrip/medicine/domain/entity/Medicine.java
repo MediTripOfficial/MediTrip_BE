@@ -25,10 +25,10 @@ public class Medicine extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name_ko;
-    private String name_en;
-    private String manufacturer_ko;
-    private String manufacturer_en;
+    private String nameKo;
+    private String nameEn;
+    private String manufacturerKo;
+    private String manufacturerEn;
     private Boolean isConvenienceStore;
     private Boolean isChildSafe;
     private String usageEn;
@@ -48,6 +48,8 @@ public class Medicine extends BaseEntity {
     private String seeDoctorKo;
     private String imageUrl;
     private String countryCode;
+
+    private Integer severityTier;
 
     @Column(name = "source_url", columnDefinition = "TEXT")
     private String sourceUrl;

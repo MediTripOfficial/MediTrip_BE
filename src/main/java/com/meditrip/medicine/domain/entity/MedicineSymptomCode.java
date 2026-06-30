@@ -13,18 +13,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "ingredients")
+@Table(name = "medicine_symptom_codes")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
-public class Ingredient extends BaseEntity {
+public class MedicineSymptomCode extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nameEn;
-    private String nameKo;
+    private Long medicineId;
+    private Integer symptomCode;
 
 }
