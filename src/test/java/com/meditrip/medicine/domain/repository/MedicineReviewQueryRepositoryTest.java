@@ -54,6 +54,52 @@ class MedicineReviewQueryRepositoryTest {
         assertThat(result).extracting(MedicineReview::getId).containsExactly(matched.getId());
     }
 
+    @DisplayName("삭제된(isDeleted=true) 리뷰는 조회 결과에서 제외된다.")
+    @Test
+    void shouldExcludeDeletedReviews() {
+        //given
+        Long medicineId = 1L;
+
+        MedicineReview activeReview = persistReview(medicineId, 5.0, "Female", "KR", "Headache");
+
+        MedicineReview deletedReview = persistReview(medicineId, 4.0, "Male", "KR", "Headache");
+        deletedReview.delete();
+        medicineReviewRepository.save(deletedReview);
+
+        //when
+        List<MedicineReview> result = medicineReviewQueryRepository.findReviews(medicineId, null, 10,
+                ReviewSortType.LATEST, null, null, null);
+
+        //then
+        assertThat(result).extracting(MedicineReview::getId).containsExactly(activeReview.getId())
+                .doesNotContain(deletedReview.getId());
+    }
+
+    @DisplayName("같은 약에 삭제된 리뷰와 삭제되지 않은 리뷰가 섞여 있어도, 삭제되지 않은 리뷰의 개수만 정확히 조회된다.")
+    @Test
+    void shouldReturnOnlyNonDeletedReviewsCount_whenMixedWithDeletedReviews() {
+        //given
+        Long medicineId = 1L;
+
+        persistReview(medicineId, 5.0, "Female", "KR", "Headache");
+        persistReview(medicineId, 4.0, "Female", "KR", "Headache");
+
+        MedicineReview deleted1 = persistReview(medicineId, 3.0, "Male", "KR", "Headache");
+        deleted1.delete();
+        medicineReviewRepository.save(deleted1);
+
+        MedicineReview deleted2 = persistReview(medicineId, 2.0, "Male", "KR", "Headache");
+        deleted2.delete();
+        medicineReviewRepository.save(deleted2);
+
+        //when
+        List<MedicineReview> result = medicineReviewQueryRepository.findReviews(
+                medicineId, null, 10, ReviewSortType.LATEST, null, null, null);
+
+        //then
+        assertThat(result).hasSize(2);
+    }
+
     @DisplayName("sort가 LATEST이면 id 내림차순(최신순)으로 정렬되어 조회된다.")
     @Test
     void shouldReturnReviewsOrderedByIdDescending_whenSortIsLatest() {

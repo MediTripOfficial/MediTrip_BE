@@ -68,4 +68,8 @@ public class MedicineReview extends BaseEntity {
                 .build();
     }
 
+    public void delete() {
+        this.isDeleted = true;
+    }
+
 }
