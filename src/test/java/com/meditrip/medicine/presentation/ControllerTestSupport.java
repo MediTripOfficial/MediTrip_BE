@@ -2,6 +2,7 @@ package com.meditrip.medicine.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.meditrip.common.jwt.JwtProvider;
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.entity.enums.Gender;
 import com.meditrip.user.domain.entity.enums.Provider;
@@ -25,6 +26,9 @@ public class ControllerTestSupport {
     protected final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
 
+    @Autowired
+    protected JwtProvider jwtProvider;
+
     protected User createUser(UUID userId, String email, String encodedPassword, UserStatus userStatus) {
         return User.builder()
                 .id(userId)
@@ -43,8 +47,8 @@ public class ControllerTestSupport {
                 .build();
     }
 
-    protected User createUser(UUID userId, String email, UserStatus userStatus) {
-        return createUser(userId, email, "password123!", userStatus);
+    protected User createUser(UUID userId, UserStatus userStatus) {
+        return createUser(userId, "test@test.com", "password123!", userStatus);
     }
 
 }

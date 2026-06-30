@@ -4,6 +4,7 @@ import com.meditrip.medicine.application.dto.MedicineInfo;
 import com.meditrip.medicine.application.dto.response.MedicineResponse;
 import com.meditrip.medicine.domain.exception.MedicineNotFoundException;
 import com.meditrip.medicine.domain.repository.MedicineQueryRepository;
+import com.meditrip.medicine.domain.repository.MedicineRepository;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MedicineService {
 
     private final MedicineQueryRepository medicineQueryRepository;
+    private final MedicineRepository medicineRepository;
 
     @Transactional(readOnly = true)
     public MedicineResponse getInfo(Long medicineId, UUID userId) {
@@ -27,6 +29,10 @@ public class MedicineService {
         }
 
         return MedicineResponse.of(medicineInfo.get());
+    }
+
+    public boolean existsById(Long medicineId) {
+        return medicineRepository.existsById(medicineId);
     }
 
 }
