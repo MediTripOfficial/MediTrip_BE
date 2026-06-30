@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -86,9 +87,14 @@ public class SymptomRecommendationService {
 
         List<Medicine> sortedMedicines = sortByTierCloseness(bundle.medicines(), totalScore);
 
+        List<Long> medicineIds = sortedMedicines.stream().map(Medicine::getId).toList();
+        Map<Long, List<MedicineReview>> reviewsByMedicineId = loadReviewsByMedicineIds(medicineIds);
+
         List<MedicineSummaryResponse> medicineResponses = sortedMedicines.stream()
                 .map(medicine -> toMedicineSummary(
-                        medicine, bundle.ingredientsByMedicineId().getOrDefault(medicine.getId(), List.of())))
+                        medicine,
+                        bundle.ingredientsByMedicineId().getOrDefault(medicine.getId(), List.of()),
+                        reviewsByMedicineId.getOrDefault(medicine.getId(), List.of())))
                 .toList();
 
         List<Medicine> medicinesForSimilarDrugs = filterByCountry(sortedMedicines, userCountry);
@@ -169,11 +175,11 @@ public class SymptomRecommendationService {
         return Math.abs(tier - targetTier);
     }
 
-    private MedicineSummaryResponse toMedicineSummary(Medicine medicine, List<String> ingredientNames) {
-        List<MedicineReview> medicineReviews = medicineReviewRepository.findAllByMedicineId(medicine.getId());
-
-        double rating = medicineReviews.isEmpty() ? 0.0
-                : medicineReviews.stream().mapToDouble(MedicineReview::getRating).average().orElse(0.0);
+    private MedicineSummaryResponse toMedicineSummary(Medicine medicine, List<String> ingredientNames,
+                                                      List<MedicineReview> reviews) {
+        Double rating = reviews.isEmpty()
+                ? null
+                : reviews.stream().mapToDouble(MedicineReview::getRating).average().orElse(0.0);
 
         boolean isConvenienceStore = Boolean.TRUE.equals(medicine.getIsConvenienceStore());
         List<String> purchaseLocation = isConvenienceStore
@@ -188,8 +194,17 @@ public class SymptomRecommendationService {
                 .purchaseLocation(purchaseLocation)
                 .imageUrl(medicine.getImageUrl())
                 .rating(rating)
-                .reviewCount(medicineReviews.size())
+                .reviewCount(reviews.size())
                 .build();
+    }
+
+    private Map<Long, List<MedicineReview>> loadReviewsByMedicineIds(List<Long> medicineIds) {
+        if (medicineIds.isEmpty()) {
+            return Map.of();
+        }
+
+        List<MedicineReview> reviews = medicineReviewRepository.findAllByMedicineIdInAndIsDeletedFalse(medicineIds);
+        return reviews.stream().collect(Collectors.groupingBy(MedicineReview::getMedicineId));
     }
 
     private List<SimilarDrugResponse> buildSimilarDrugs(List<Medicine> medicines,

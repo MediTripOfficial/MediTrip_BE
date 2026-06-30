@@ -1,13 +1,12 @@
 package com.meditrip.user.application;
 
-import com.meditrip.user.application.dto.request.OnboardingApplicationRequest;
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.user.application.dto.request.SignupApplicationRequest;
 import com.meditrip.user.domain.entity.Allergy;
 import com.meditrip.user.domain.entity.Condition;
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.entity.UserAllergy;
 import com.meditrip.user.domain.entity.UserCondition;
-import com.meditrip.user.domain.entity.enums.UserStatus;
 import com.meditrip.user.domain.repository.AllergyRepository;
 import com.meditrip.user.domain.repository.ConditionRepository;
 import com.meditrip.user.domain.repository.UserAllergyRepository;

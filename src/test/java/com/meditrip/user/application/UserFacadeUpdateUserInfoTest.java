@@ -9,13 +9,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.common.exception.NotFoundException;
 import com.meditrip.user.application.dto.request.UpdateUserInfoApplicationRequest;
 import com.meditrip.user.application.dto.response.UserInfoResponse;
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.entity.enums.Gender;
 import com.meditrip.user.domain.entity.enums.Provider;
-import com.meditrip.user.domain.entity.enums.UserStatus;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;

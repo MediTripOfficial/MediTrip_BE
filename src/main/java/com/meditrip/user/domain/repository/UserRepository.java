@@ -1,7 +1,7 @@
 package com.meditrip.user.domain.repository;
 
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.user.domain.entity.User;
-import com.meditrip.user.domain.entity.enums.UserStatus;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

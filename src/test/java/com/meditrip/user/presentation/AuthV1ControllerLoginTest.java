@@ -5,7 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.meditrip.user.domain.entity.enums.UserStatus;
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.user.domain.repository.UserRepository;
 import com.meditrip.user.infra.redis.RedisTokenStore;
 import com.meditrip.user.presentation.dto.request.LoginRequest;

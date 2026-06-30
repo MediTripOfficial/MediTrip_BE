@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.user.domain.entity.User;
-import com.meditrip.user.domain.entity.enums.UserStatus;
 import com.meditrip.user.domain.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;

@@ -10,13 +10,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.user.application.dto.request.SignupApplicationRequest;
 import com.meditrip.user.domain.entity.Allergy;
 import com.meditrip.user.domain.entity.Condition;
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.entity.enums.Gender;
 import com.meditrip.user.domain.entity.enums.Provider;
-import com.meditrip.user.domain.entity.enums.UserStatus;
 import com.meditrip.user.domain.repository.AllergyRepository;
 import com.meditrip.user.domain.repository.ConditionRepository;
 import com.meditrip.user.domain.repository.UserAllergyRepository;

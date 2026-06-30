@@ -6,9 +6,11 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 import com.meditrip.medicine.application.dto.MedicineInfo;
-import com.meditrip.medicine.application.dto.response.MedicineResponse;
+import com.meditrip.medicine.domain.entity.MedicineReview;
 import com.meditrip.medicine.domain.exception.MedicineNotFoundException;
 import com.meditrip.medicine.domain.repository.MedicineQueryRepository;
+import com.meditrip.medicine.domain.repository.MedicineRepository;
+import com.meditrip.medicine.domain.repository.MedicineReviewRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,12 +27,18 @@ class MedicineServiceGetMedicineInfoTest {
     @Mock
     private MedicineQueryRepository medicineQueryRepository;
 
+    @Mock
+    private MedicineRepository medicineRepository;
+
+    @Mock
+    private MedicineReviewRepository medicineReviewRepository;
+
     @InjectMocks
     private MedicineService medicineService;
 
+    @DisplayName("존재하는 약 ID로 조회하면 MedicineInfo를 그대로 반환한다")
     @Test
-    @DisplayName("존재하는 약 ID로 조회하면 MedicineInfo를 MedicineResponse로 변환하여 반환한다")
-    void shouldReturnMedicineResponse_whenMedicineExistsWithValidId() {
+    void shouldReturnMedicineInfo_whenMedicineExistsWithValidId() {
         //given
         Long medicineId = 1L;
         UUID userId = UUID.randomUUID();
@@ -58,37 +66,30 @@ class MedicineServiceGetMedicineInfoTest {
                 .drugInteractions("None known")
                 .seeDoctor("If symptoms persist over 3 days")
                 .countryCode("US")
-                .rating(null)
-                .reviewCount(null)
-                .topReview(null)
                 .build();
 
         given(medicineQueryRepository.findInfoById(medicineId))
                 .willReturn(Optional.of(medicineInfo));
 
         //when
-        MedicineResponse response = medicineService.getInfo(medicineId, userId);
+        MedicineInfo result = medicineService.getInfo(medicineId, userId);
 
         //then
-        assertThat(response.getId()).isEqualTo(medicineId);
-        assertThat(response.getName()).isEqualTo("Tylenol");
-        assertThat(response.getManufacturer()).isEqualTo("Johnson & Johnson");
-        assertThat(response.getIngredients()).hasSize(1);
-        assertThat(response.getIngredients().get(0).getIngredientName()).isEqualTo("Acetaminophen");
-        assertThat(response.getIngredients().get(0).getAmount()).isEqualTo("500mg");
-        assertThat(response.getDiseaseHashtags()).containsExactly("headache", "fever");
-        assertThat(response.getEfficacyHashtags()).containsExactly("painRelief");
-        assertThat(response.getIsConvenienceStore()).isTrue();
-        assertThat(response.getPurchaseLocation()).containsExactly("store", "pharmacy");
-        assertThat(response.getRating()).isNull();
-        assertThat(response.getReviewCount()).isNull();
-        assertThat(response.getTopReview()).isNull();
+        assertThat(result.getId()).isEqualTo(medicineId);
+        assertThat(result.getName()).isEqualTo("Tylenol");
+        assertThat(result.getManufacturer()).isEqualTo("Johnson & Johnson");
+        assertThat(result.getIngredients()).hasSize(1);
+        assertThat(result.getIngredients().get(0).getIngredientName()).isEqualTo("Acetaminophen");
+        assertThat(result.getDiseaseHashtags()).containsExactly("headache", "fever");
+        assertThat(result.getEfficacyHashtags()).containsExactly("painRelief");
+        assertThat(result.getIsConvenienceStore()).isTrue();
+        assertThat(result.getPurchaseLocation()).containsExactly("store", "pharmacy");
 
         then(medicineQueryRepository).should().findInfoById(medicineId);
     }
 
-    @Test
     @DisplayName("존재하지 않는 약 ID로 조회하면 MedicineNotFoundException이 발생한다")
+    @Test
     void shouldThrowMedicineNotFoundException_whenMedicineDoesNotExist() {
         //given
         Long medicineId = 999L;
@@ -101,6 +102,40 @@ class MedicineServiceGetMedicineInfoTest {
                 .isInstanceOf(MedicineNotFoundException.class);
 
         then(medicineQueryRepository).should().findInfoById(medicineId);
+    }
+
+    @DisplayName("리뷰가 존재하면 가장 최근(id가 가장 큰) 삭제되지 않은 리뷰를 topReview로 반환한다")
+    @Test
+    void shouldReturnLatestNonDeletedReview_whenReviewsExist() {
+        //given
+        Long medicineId = 1L;
+        MedicineReview latestReview = MedicineReview.create(
+                medicineId, "최고예요", 25, 170.0, 60.0, 5.0, "Female", "KR", UUID.randomUUID(), "Headache");
+
+        given(medicineReviewRepository.findTopByMedicineIdAndIsDeletedFalseOrderByIdDesc(medicineId))
+                .willReturn(Optional.of(latestReview));
+
+        //when
+        MedicineReview result = medicineService.getMedicineTopReview(medicineId);
+
+        //then
+        assertThat(result).isEqualTo(latestReview);
+    }
+
+    @DisplayName("리뷰가 하나도 없으면(또는 전부 삭제됐으면) topReview로 null을 반환한다 (예외를 던지지 않음)")
+    @Test
+    void shouldReturnNull_whenNoReviewsExist() {
+        //given
+        Long medicineId = 1L;
+
+        given(medicineReviewRepository.findTopByMedicineIdAndIsDeletedFalseOrderByIdDesc(medicineId))
+                .willReturn(Optional.empty());
+
+        //when
+        MedicineReview result = medicineService.getMedicineTopReview(medicineId);
+
+        //then
+        assertThat(result).isNull();
     }
 
 }

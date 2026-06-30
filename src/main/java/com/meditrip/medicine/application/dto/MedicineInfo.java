@@ -54,8 +54,8 @@ public class MedicineInfo {
         private final Double rating;
         private final LocalDate createdAt;
         private final List<String> symptoms;
-        private final boolean isAuthor;
         private final String review;
+        private final String profileImg;
     }
 
 }

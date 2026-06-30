@@ -88,9 +88,6 @@ public class MedicineQueryRepository {
                 .drugInteractions(medicine.getDrugInteractionsEn())
                 .seeDoctor(medicine.getSeeDoctorEn())
                 .countryCode(medicine.getCountryCode())
-                .rating(null) //TODO : 리뷰 기능 추가 후 변경
-                .reviewCount(null)
-                .topReview(null)
                 .build();
 
         return Optional.of(medicineInfo);

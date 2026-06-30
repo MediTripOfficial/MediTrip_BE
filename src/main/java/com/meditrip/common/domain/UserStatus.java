@@ -1,4 +1,4 @@
-package com.meditrip.user.domain.entity.enums;
+package com.meditrip.common.domain;
 
 import lombok.Getter;
 

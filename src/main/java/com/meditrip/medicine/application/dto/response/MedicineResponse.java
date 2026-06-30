@@ -1,9 +1,10 @@
 package com.meditrip.medicine.application.dto.response;
 
 import com.meditrip.medicine.application.dto.MedicineInfo;
+import com.meditrip.medicine.domain.entity.MedicineReview;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
-import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,7 +36,7 @@ public class MedicineResponse {
     private final Integer reviewCount;
     private final Review topReview;
 
-    public static MedicineResponse of(MedicineInfo info) {
+    public static MedicineResponse of(MedicineInfo info, Double rating, int reviewCount, Review topReview) {
         return MedicineResponse.builder()
                 .id(info.getId())
                 .name(info.getName())
@@ -59,11 +60,9 @@ public class MedicineResponse {
                 .drugInteractions(info.getDrugInteractions())
                 .seeDoctor(info.getSeeDoctor())
                 .countryCode(info.getCountryCode())
-                .rating(info.getRating())
-                .reviewCount(info.getReviewCount())
-                .topReview(Optional.ofNullable(info.getTopReview())
-                        .map(Review::of)
-                        .orElse(null))
+                .rating(rating)
+                .reviewCount(reviewCount)
+                .topReview(topReview)
                 .build();
     }
 
@@ -94,23 +93,35 @@ public class MedicineResponse {
         private final Double rating;
         private final LocalDate createdAt;
         private final List<String> symptoms;
-        private final boolean isAuthor;
         private final String review;
+        private final String profileImg;
 
-        public static Review of(MedicineInfo.Review review) {
+        public static Review of(MedicineReview review, String nickname, String profileImg) {
             return Review.builder()
                     .id(review.getId())
-                    .authorGender(review.getAuthorGender())
-                    .authorAgeGroup(review.getAuthorAgeGroup())
-                    .authorRegion(review.getAuthorRegion())
+                    .authorGender(review.getGender())
+                    .authorAgeGroup(toAgeGroup(review.getAge()))
+                    .authorRegion(review.getCountry())
                     .rating(review.getRating())
-                    .createdAt(review.getCreatedAt())
-                    .symptoms(review.getSymptoms())
+                    .createdAt(review.getCreatedAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDate())
+                    .symptoms(toSymptomList(review.getSymptom()))
                     .review(review.getReview())
-                    .isAuthor(review.isAuthor())
-                    .nickname(review.getNickname())
+                    .nickname(nickname)
+                    .profileImg(profileImg)
                     .build();
         }
+    }
+
+    private static String toAgeGroup(Integer age) {
+        if (age == null) {
+            return null;
+        }
+        int decade = (age / 10) * 10;
+        return decade + "s";
+    }
+
+    private static List<String> toSymptomList(String symptom) {
+        return symptom == null ? List.of() : List.of(symptom);
     }
 
 }
