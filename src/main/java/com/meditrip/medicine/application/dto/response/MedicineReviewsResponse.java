@@ -15,6 +15,7 @@ public class MedicineReviewsResponse {
 
     private final Long id;
     private final String nickname;
+    private final String userProfileImg;
     private final String authorGender;
     private final String authorAgeGroup;
     private final String authorRegion;
@@ -27,10 +28,11 @@ public class MedicineReviewsResponse {
 
     private final String review;
 
-    public static MedicineReviewsResponse from(MedicineReview review, String nickname, UUID requestUserId) {
+    public static MedicineReviewsResponse from(MedicineReview review, String nickname, String userProfileImg, UUID requestUserId) {
         return MedicineReviewsResponse.builder()
                 .id(review.getId())
                 .nickname(nickname)
+                .userProfileImg(userProfileImg)
                 .authorGender(review.getGender())
                 .authorAgeGroup(toAgeGroup(review.getAge()))
                 .authorRegion(review.getCountry())

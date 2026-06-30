@@ -79,17 +79,18 @@ public class MedicineReviewFacade {
                 ? String.valueOf(pageContent.get(pageContent.size() - 1).getId())
                 : null;
 
-        // 리뷰 작성자들의 최신 닉네임을 한 번에 조회 (N+1 방지)
         List<UUID> authorIds = pageContent.stream()
                 .map(MedicineReview::getUserId)
                 .distinct()
                 .toList();
         Map<UUID, String> nicknameByUserId = userService.getNicknamesByUserIds(authorIds);
+        Map<UUID, String> profileImgByUserId = userService.getProfileImgsByUserIds(authorIds);
 
         List<MedicineReviewsResponse> items = pageContent.stream()
                 .map(review -> MedicineReviewsResponse.from(
                         review,
                         nicknameByUserId.get(review.getUserId()),
+                        profileImgByUserId.get(review.getUserId()),
                         userId))
                 .toList();
 

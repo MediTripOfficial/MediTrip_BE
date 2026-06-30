@@ -118,7 +118,7 @@ public class UserService {
     public UserInfo getReviewUserInfo(UUID userId) {
         Optional<User> user = userRepository.findByIdAndStatusIn(userId, List.of(UserStatus.ACTIVE));
 
-        if (user.isEmpty()){
+        if (user.isEmpty()) {
             return null;
         }
 
@@ -143,6 +143,18 @@ public class UserService {
 
         return userRepository.findByIdIn(userIds).stream()
                 .collect(Collectors.toMap(User::getId, User::getNickname));
+    }
+
+    public Map<UUID, String> getProfileImgsByUserIds(List<UUID> userIds) {
+        if (userIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return userRepository.findByIdIn(userIds).stream()
+                .collect(Collectors.toMap(
+                        User::getId,
+                        user -> user.getProfileImg() == null ? "" : user.getProfileImg()
+                ));
     }
 
 }
