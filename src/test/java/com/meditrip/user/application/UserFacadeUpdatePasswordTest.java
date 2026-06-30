@@ -7,11 +7,11 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.user.application.dto.request.UpdatePasswordApplicationRequest;
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.entity.enums.Gender;
 import com.meditrip.user.domain.entity.enums.Provider;
-import com.meditrip.user.domain.entity.enums.UserStatus;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;

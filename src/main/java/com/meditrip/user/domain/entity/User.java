@@ -1,10 +1,10 @@
 package com.meditrip.user.domain.entity;
 
 import com.meditrip.common.domain.BaseEntity;
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.common.exception.NotFoundException;
 import com.meditrip.user.domain.entity.enums.Gender;
 import com.meditrip.user.domain.entity.enums.Provider;
-import com.meditrip.user.domain.entity.enums.UserStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

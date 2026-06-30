@@ -7,11 +7,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.common.event.OAuth2LoginRequestEvent;
 import com.meditrip.common.event.OAuth2UnlinkRequestEvent;
 import com.meditrip.config.oauth.user.OAuth2Provider;
 import com.meditrip.user.domain.entity.User;
-import com.meditrip.user.domain.entity.enums.UserStatus;
 import com.meditrip.user.domain.repository.UserRepository;
 import java.util.Optional;
 import java.util.UUID;
