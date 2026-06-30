@@ -2,6 +2,7 @@ package com.meditrip.user.application;
 
 import com.meditrip.common.exception.NotFoundException;
 import com.meditrip.common.util.SecurityUtils;
+import com.meditrip.medicine.domain.UserInfo;
 import com.meditrip.user.application.dto.response.UserInfoResponse;
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.entity.enums.UserStatus;
@@ -9,8 +10,12 @@ import com.meditrip.user.domain.exception.UserNotFoundException;
 import com.meditrip.user.domain.repository.UserAllergyRepository;
 import com.meditrip.user.domain.repository.UserConditionRepository;
 import com.meditrip.user.domain.repository.UserRepository;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
@@ -84,7 +89,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public void validUpdateUser(String nickname, UUID userId) {
         userRepository.findByNickname(nickname).ifPresent(user -> {
-            if (user.getId().equals(userId)){
+            if (user.getId().equals(userId)) {
                 return;
             }
 
@@ -106,6 +111,31 @@ public class UserService {
                     log.info("{} 유저 정보가 존재하지 않습니다. Email : [{}]", method, maskedEmail);
                     return new UserNotFoundException();
                 });
+    }
+
+    @Transactional(readOnly = true)
+    public UserInfo getReviewUserInfo(UUID userId) {
+        User user = userRepository.findByIdAndStatusIn(userId, List.of(UserStatus.ACTIVE))
+                .orElseThrow(UserNotFoundException::new);
+
+        return UserInfo.builder()
+                .userId(user.getId())
+                .gender(user.getGender().getEng())
+                .country(user.getCountry())
+                .weight(user.getWeight())
+                .height(user.getHeight())
+                .age(Period.between(user.getBirth(), LocalDate.now()).getYears())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public Map<UUID, String> getNicknamesByUserIds(List<UUID> userIds) {
+        if (userIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return userRepository.findByIdIn(userIds).stream()
+                .collect(Collectors.toMap(User::getId, User::getNickname));
     }
 
 }
