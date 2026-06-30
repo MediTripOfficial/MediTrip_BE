@@ -4,12 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.common.exception.NotFoundException;
 import com.meditrip.user.application.dto.response.UserInfoResponse;
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.entity.enums.Gender;
 import com.meditrip.user.domain.entity.enums.Provider;
-import com.meditrip.user.domain.entity.enums.UserStatus;
 import com.meditrip.user.domain.repository.UserAllergyRepository;
 import com.meditrip.user.domain.repository.UserConditionRepository;
 import com.meditrip.user.domain.repository.UserRepository;

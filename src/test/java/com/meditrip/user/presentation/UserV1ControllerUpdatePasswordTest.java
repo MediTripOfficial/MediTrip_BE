@@ -5,10 +5,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.common.jwt.JwtProperties;
 import com.meditrip.common.jwt.JwtProvider;
 import com.meditrip.user.domain.entity.User;
-import com.meditrip.user.domain.entity.enums.UserStatus;
 import com.meditrip.user.domain.repository.UserRepository;
 import com.meditrip.user.presentation.dto.request.UpdatePasswordRequest;
 import io.jsonwebtoken.Jwts;

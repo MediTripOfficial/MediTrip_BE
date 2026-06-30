@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.medicine.application.dto.request.CreateMedicineReviewApplicationRequest;
 import com.meditrip.medicine.domain.UserInfo;
 import com.meditrip.medicine.domain.exception.MedicineNotFoundException;
@@ -52,6 +53,9 @@ class MedicineReviewFacadeCreateTest {
                 .weight(103.0)
                 .height(190.0)
                 .age(12)
+                .userStatus(UserStatus.ACTIVE)
+                .nickname("닉네임")
+                .profileImg("profileImg")
                 .build();
 
         CreateMedicineReviewApplicationRequest request = CreateMedicineReviewApplicationRequest.builder()
@@ -112,6 +116,9 @@ class MedicineReviewFacadeCreateTest {
                 .weight(103.0)
                 .height(190.0)
                 .age(12)
+                .userStatus(UserStatus.ACTIVE)
+                .nickname("닉네임")
+                .profileImg("profileImg")
                 .build();
 
         CreateMedicineReviewApplicationRequest request = CreateMedicineReviewApplicationRequest.builder()

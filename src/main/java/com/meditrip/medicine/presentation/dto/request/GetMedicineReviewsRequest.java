@@ -35,4 +35,5 @@ public class GetMedicineReviewsRequest {
                 .symptoms(this.symptoms)
                 .build();
     }
+
 }

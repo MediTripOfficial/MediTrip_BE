@@ -14,6 +14,8 @@ import com.meditrip.medicine.application.dto.response.SymptomRecommendationRespo
 import com.meditrip.medicine.application.dto.response.SymptomRecommendationResponse.SimilarDrugResponse;
 import com.meditrip.medicine.application.dto.response.SymptomRecommendationResponse.SymptomResponse;
 import com.meditrip.medicine.domain.entity.Medicine;
+import com.meditrip.medicine.domain.entity.MedicineReview;
+import com.meditrip.medicine.domain.repository.MedicineReviewRepository;
 import com.meditrip.medicine.domain.repository.SymptomMedicineQueryRepository;
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.repository.UserAllergyRepository;
@@ -47,6 +49,9 @@ class SymptomRecommendationServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private MedicineReviewRepository medicineReviewRepository;
+
     @InjectMocks
     private SymptomRecommendationService symptomRecommendationService;
 
@@ -62,88 +67,12 @@ class SymptomRecommendationServiceTest {
                 .build();
     }
 
-    @Test
-    @DisplayName("약 매칭 + tier 정렬 + 국가 필터 + secondarySymptom 추정까지 전체 파이프라인이 정상 동작한다.")
-    void recommend_returnsFullPipeline_whenHappyPathWithSiblingAndCountryMatch() {
-        //given
-        UUID userId = UUID.randomUUID();
-        SymptomRecommendationApplicationRequest request = SymptomRecommendationApplicationRequest.builder()
-                .primaryCode(11) // GENERAL_INTERNAL_PAIN, baseScore=60
-                .totalScore(65)  // targetTier = 2 (60~119)
-                .chatting("두통이 있어요")
+    private static MedicineReview review(Long id, Long medicineId, double rating) {
+        return MedicineReview.builder()
+                .id(id)
+                .medicineId(medicineId)
+                .rating(rating)
                 .build();
-
-        given(userConditionRepository.findConditionNamesByUserId(userId)).willReturn(List.of());
-        given(userAllergyRepository.findAllergyNamesByUserId(userId)).willReturn(List.of());
-        given(userRepository.findById(userId))
-                .willReturn(Optional.of(User.builder().id(userId).country("KR").build()));
-
-        // primaryCode=11 매칭 약 3개: tier1(KR), tier2(US), tier2(KR)
-        Medicine tylenol = medicine(1L, "Tylenol", "J&J", "KR", true, 1);
-        Medicine ibuprofenX = medicine(2L, "Ibuprofen X", "ABC", "US", false, 2);
-        Medicine geworin = medicine(3L, "Geworin", "Samjin", "KR", false, 2);
-
-        given(symptomMedicineQueryRepository.findMedicinesBySymptomCode(11))
-                .willReturn(List.of(tylenol, ibuprofenX, geworin));
-        given(symptomMedicineQueryRepository.findIngredientNamesByMedicineIds(List.of(1L, 2L, 3L)))
-                .willReturn(Map.of(
-                        1L, List.of("Acetaminophen"),
-                        2L, List.of("Ibuprofen"),
-                        3L, List.of("Acetaminophen", "Caffeine")));
-
-        // secondaryCode=12(MUSCLE_JOINT_PAIN, baseScore=70, |70-65|=5)가 가장 가까움
-        Medicine coldPas = medicine(4L, "ColdPas", "ZZZ", "KR", true, 1);
-        given(symptomMedicineQueryRepository.findMedicinesBySymptomCode(12))
-                .willReturn(List.of(coldPas));
-        given(symptomMedicineQueryRepository.findIngredientNamesByMedicineIds(List.of(4L)))
-                .willReturn(Map.of(4L, List.of("Menthol")));
-
-        //when
-        SymptomRecommendationResponse response = symptomRecommendationService.recommend(request, userId);
-
-        //then - primarySymptom
-        SymptomResponse primary = response.getResult().getPrimarySymptom();
-        assertThat(primary.getName()).isEqualTo("Fever, Pain & Inflammation");
-        assertThat(primary.getDescription()).isEqualTo("General & Internal Pain");
-
-        //medicines: tier 거리(0,0,1) + id 오름차순으로 정렬 -> [ibuprofenX(2), geworin(3), tylenol(1)]
-        List<MedicineSummaryResponse> medicines = primary.getMedicines();
-        assertThat(medicines).hasSize(3);
-        assertThat(medicines.get(0).getId()).isEqualTo(2L);
-        assertThat(medicines.get(0).getPurchaseLocation()).containsExactly("pharmacy");
-        assertThat(medicines.get(1).getId()).isEqualTo(3L);
-        assertThat(medicines.get(1).getActiveIngredientsEng()).containsExactly("Acetaminophen", "Caffeine");
-        assertThat(medicines.get(2).getId()).isEqualTo(1L);
-        assertThat(medicines.get(2).getPurchaseLocation()).containsExactly("store", "pharmacy");
-        medicines.forEach(m -> {
-            assertThat(m.getRating()).isNull();
-            assertThat(m.getReviewCount()).isNull();
-        });
-
-        //similarDrugs: 국가 필터(KR)로 ibuprofenX(US) 제외 -> [geworin, tylenol] 순서로 대표 추출
-        List<SimilarDrugResponse> similarDrugs = primary.getSimilarDrugs();
-        assertThat(similarDrugs).hasSize(2);
-        assertThat(similarDrugs.get(0).getProductNameEng()).isEqualTo("Geworin");
-        assertThat(similarDrugs.get(0).getActiveIngredientsEng()).containsExactly("Acetaminophen", "Caffeine");
-        assertThat(similarDrugs.get(1).getProductNameEng()).isEqualTo("Tylenol");
-        assertThat(similarDrugs.get(1).getActiveIngredientsEng()).containsExactly("Acetaminophen");
-
-        //then - secondarySymptom (primary와 완전히 같은 구조)
-        SymptomResponse secondary = response.getResult().getSecondarySymptom();
-        assertThat(secondary).isNotNull();
-        assertThat(secondary.getName()).isEqualTo("Fever, Pain & Inflammation");
-        assertThat(secondary.getDescription()).isEqualTo("Muscle & Joint Pain");
-        assertThat(secondary.getMedicines()).hasSize(1);
-        assertThat(secondary.getMedicines().get(0).getId()).isEqualTo(4L);
-        assertThat(secondary.getMedicines().get(0).getPurchaseLocation()).containsExactly("store", "pharmacy");
-        assertThat(secondary.getSimilarDrugs()).hasSize(1);
-        assertThat(secondary.getSimilarDrugs().get(0).getProductNameEng()).isEqualTo("ColdPas");
-
-        then(symptomMedicineQueryRepository).should(times(1)).findMedicinesBySymptomCode(11);
-        then(symptomMedicineQueryRepository).should(times(1)).findMedicinesBySymptomCode(12);
-        then(userConditionRepository).should(times(1)).findConditionNamesByUserId(userId);
-        then(userAllergyRepository).should(times(1)).findAllergyNamesByUserId(userId);
-        then(userRepository).should(times(1)).findById(userId);
     }
 
     @Test

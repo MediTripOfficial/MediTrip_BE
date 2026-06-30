@@ -5,6 +5,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.common.jwt.JwtProperties;
 import com.meditrip.common.jwt.JwtProvider;
 import com.meditrip.user.domain.entity.Allergy;
@@ -14,13 +16,11 @@ import com.meditrip.user.domain.entity.UserAllergy;
 import com.meditrip.user.domain.entity.UserCondition;
 import com.meditrip.user.domain.entity.enums.Gender;
 import com.meditrip.user.domain.entity.enums.Provider;
-import com.meditrip.user.domain.entity.enums.UserStatus;
 import com.meditrip.user.domain.repository.AllergyRepository;
 import com.meditrip.user.domain.repository.ConditionRepository;
 import com.meditrip.user.domain.repository.UserAllergyRepository;
 import com.meditrip.user.domain.repository.UserConditionRepository;
 import com.meditrip.user.domain.repository.UserRepository;
-import com.fasterxml.jackson.databind.JsonNode;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;

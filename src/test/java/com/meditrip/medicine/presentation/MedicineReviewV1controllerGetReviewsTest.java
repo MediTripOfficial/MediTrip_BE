@@ -6,12 +6,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.medicine.domain.entity.Medicine;
 import com.meditrip.medicine.domain.entity.MedicineReview;
 import com.meditrip.medicine.domain.repository.MedicineRepository;
 import com.meditrip.medicine.domain.repository.MedicineReviewRepository;
 import com.meditrip.user.domain.entity.User;
-import com.meditrip.user.domain.entity.enums.UserStatus;
 import com.meditrip.user.domain.repository.UserRepository;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;

@@ -1,12 +1,12 @@
 package com.meditrip.user.application;
 
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.user.application.dto.request.OnboardingApplicationRequest;
 import com.meditrip.user.application.dto.request.UpdatePasswordApplicationRequest;
 import com.meditrip.user.application.dto.request.UpdateUserInfoApplicationRequest;
 import com.meditrip.user.application.dto.request.WithdrawnApplicationRequest;
 import com.meditrip.user.application.dto.response.UserInfoResponse;
 import com.meditrip.user.domain.entity.User;
-import com.meditrip.user.domain.entity.enums.UserStatus;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

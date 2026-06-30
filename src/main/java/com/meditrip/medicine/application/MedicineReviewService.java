@@ -5,6 +5,7 @@ import com.meditrip.medicine.domain.UserInfo;
 import com.meditrip.medicine.domain.entity.MedicineReview;
 import com.meditrip.medicine.domain.exception.MedicineNotFoundException;
 import com.meditrip.medicine.domain.repository.MedicineReviewRepository;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,11 @@ public class MedicineReviewService {
         }
 
         review.get().delete();
+    }
+
+    @Transactional(readOnly = true)
+    public List<MedicineReview> getReviews(Long medicineId) {
+        return medicineReviewRepository.findAllByMedicineIdAndIsDeletedFalse(medicineId);
     }
 
 }

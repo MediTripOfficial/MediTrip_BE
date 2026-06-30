@@ -1,11 +1,11 @@
 package com.meditrip.user.application;
 
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.common.exception.NotFoundException;
 import com.meditrip.common.util.SecurityUtils;
 import com.meditrip.medicine.domain.UserInfo;
 import com.meditrip.user.application.dto.response.UserInfoResponse;
 import com.meditrip.user.domain.entity.User;
-import com.meditrip.user.domain.entity.enums.UserStatus;
 import com.meditrip.user.domain.exception.UserNotFoundException;
 import com.meditrip.user.domain.repository.UserAllergyRepository;
 import com.meditrip.user.domain.repository.UserConditionRepository;
@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -115,16 +116,22 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserInfo getReviewUserInfo(UUID userId) {
-        User user = userRepository.findByIdAndStatusIn(userId, List.of(UserStatus.ACTIVE))
-                .orElseThrow(UserNotFoundException::new);
+        Optional<User> user = userRepository.findByIdAndStatusIn(userId, List.of(UserStatus.ACTIVE));
+
+        if (user.isEmpty()) {
+            return null;
+        }
 
         return UserInfo.builder()
-                .userId(user.getId())
-                .gender(user.getGender().getEng())
-                .country(user.getCountry())
-                .weight(user.getWeight())
-                .height(user.getHeight())
-                .age(Period.between(user.getBirth(), LocalDate.now()).getYears())
+                .userId(user.get().getId())
+                .gender(user.get().getGender().getEng())
+                .country(user.get().getCountry())
+                .weight(user.get().getWeight())
+                .height(user.get().getHeight())
+                .age(Period.between(user.get().getBirth(), LocalDate.now()).getYears())
+                .nickname(user.get().getNickname())
+                .profileImg(user.get().getProfileImg())
+                .userStatus(user.get().getStatus())
                 .build();
     }
 
@@ -136,6 +143,18 @@ public class UserService {
 
         return userRepository.findByIdIn(userIds).stream()
                 .collect(Collectors.toMap(User::getId, User::getNickname));
+    }
+
+    public Map<UUID, String> getProfileImgsByUserIds(List<UUID> userIds) {
+        if (userIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return userRepository.findByIdIn(userIds).stream()
+                .collect(Collectors.toMap(
+                        User::getId,
+                        user -> user.getProfileImg() == null ? "" : user.getProfileImg()
+                ));
     }
 
 }

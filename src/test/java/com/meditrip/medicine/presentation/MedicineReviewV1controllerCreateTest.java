@@ -6,13 +6,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.medicine.domain.entity.Medicine;
 import com.meditrip.medicine.domain.entity.MedicineReview;
 import com.meditrip.medicine.domain.repository.MedicineRepository;
 import com.meditrip.medicine.domain.repository.MedicineReviewRepository;
 import com.meditrip.medicine.presentation.dto.request.CreateMedicineReviewRequest;
 import com.meditrip.user.domain.entity.User;
-import com.meditrip.user.domain.entity.enums.UserStatus;
 import com.meditrip.user.domain.repository.UserRepository;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -114,7 +114,7 @@ class MedicineReviewV1controllerCreateTest extends ControllerTestSupport {
                         .content(objectMapper.writeValueAsString(request)))
                 //then
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("User not found."));
+                .andExpect(jsonPath("$.message").value("User Not Found."));
 
         assertThat(medicineReviewRepository.count()).isZero();
     }
@@ -150,7 +150,7 @@ class MedicineReviewV1controllerCreateTest extends ControllerTestSupport {
                         .content(objectMapper.writeValueAsString(request)))
                 //then
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("User not found."));
+                .andExpect(jsonPath("$.message").value("User Not Found."));
 
         assertThat(medicineReviewRepository.count()).isZero();
     }

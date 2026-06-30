@@ -1,5 +1,6 @@
 package com.meditrip.user.application;
 
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.common.event.OAuth2LoginRequestEvent;
 import com.meditrip.common.event.OAuth2SaveTokenEvent;
 import com.meditrip.common.event.OAuth2UnlinkRequestEvent;
@@ -7,7 +8,6 @@ import com.meditrip.common.util.SecurityUtils;
 import com.meditrip.config.oauth.user.OAuth2Provider;
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.entity.enums.Provider;
-import com.meditrip.user.domain.entity.enums.UserStatus;
 import com.meditrip.user.domain.repository.UserRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

@@ -9,6 +9,8 @@ import com.meditrip.medicine.application.dto.response.SymptomRecommendationRespo
 import com.meditrip.medicine.domain.ContraindicationPolicy;
 import com.meditrip.medicine.domain.SymptomCode;
 import com.meditrip.medicine.domain.entity.Medicine;
+import com.meditrip.medicine.domain.entity.MedicineReview;
+import com.meditrip.medicine.domain.repository.MedicineReviewRepository;
 import com.meditrip.medicine.domain.repository.SymptomMedicineQueryRepository;
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.repository.UserAllergyRepository;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,6 +42,7 @@ public class SymptomRecommendationService {
     private final UserConditionRepository userConditionRepository;
     private final UserAllergyRepository userAllergyRepository;
     private final UserRepository userRepository;
+    private final MedicineReviewRepository medicineReviewRepository;
 
     @Transactional(readOnly = true)
     public SymptomRecommendationResponse recommend(SymptomRecommendationApplicationRequest request, UUID userId) {
@@ -83,9 +87,14 @@ public class SymptomRecommendationService {
 
         List<Medicine> sortedMedicines = sortByTierCloseness(bundle.medicines(), totalScore);
 
+        List<Long> medicineIds = sortedMedicines.stream().map(Medicine::getId).toList();
+        Map<Long, List<MedicineReview>> reviewsByMedicineId = loadReviewsByMedicineIds(medicineIds);
+
         List<MedicineSummaryResponse> medicineResponses = sortedMedicines.stream()
-                .map(medicine -> toMedicineSummary(medicine,
-                        bundle.ingredientsByMedicineId().getOrDefault(medicine.getId(), List.of())))
+                .map(medicine -> toMedicineSummary(
+                        medicine,
+                        bundle.ingredientsByMedicineId().getOrDefault(medicine.getId(), List.of()),
+                        reviewsByMedicineId.getOrDefault(medicine.getId(), List.of())))
                 .toList();
 
         List<Medicine> medicinesForSimilarDrugs = filterByCountry(sortedMedicines, userCountry);
@@ -166,7 +175,12 @@ public class SymptomRecommendationService {
         return Math.abs(tier - targetTier);
     }
 
-    private MedicineSummaryResponse toMedicineSummary(Medicine medicine, List<String> ingredientNames) {
+    private MedicineSummaryResponse toMedicineSummary(Medicine medicine, List<String> ingredientNames,
+                                                      List<MedicineReview> reviews) {
+        Double rating = reviews.isEmpty()
+                ? null
+                : reviews.stream().mapToDouble(MedicineReview::getRating).average().orElse(0.0);
+
         boolean isConvenienceStore = Boolean.TRUE.equals(medicine.getIsConvenienceStore());
         List<String> purchaseLocation = isConvenienceStore
                 ? List.of("store", "pharmacy")
@@ -179,9 +193,18 @@ public class SymptomRecommendationService {
                 .activeIngredientsEng(ingredientNames)
                 .purchaseLocation(purchaseLocation)
                 .imageUrl(medicine.getImageUrl())
-                .rating(null) // TODO: 리뷰 기능 추가 후 변경
-                .reviewCount(null)
+                .rating(rating)
+                .reviewCount(reviews.size())
                 .build();
+    }
+
+    private Map<Long, List<MedicineReview>> loadReviewsByMedicineIds(List<Long> medicineIds) {
+        if (medicineIds.isEmpty()) {
+            return Map.of();
+        }
+
+        List<MedicineReview> reviews = medicineReviewRepository.findAllByMedicineIdInAndIsDeletedFalse(medicineIds);
+        return reviews.stream().collect(Collectors.groupingBy(MedicineReview::getMedicineId));
     }
 
     private List<SimilarDrugResponse> buildSimilarDrugs(List<Medicine> medicines,

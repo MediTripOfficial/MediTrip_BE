@@ -1,5 +1,6 @@
 package com.meditrip.medicine.domain;
 
+import com.meditrip.common.domain.UserStatus;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,5 +15,8 @@ public class UserInfo {
     private final Double weight;
     private final Double height;
     private final Integer age;
+    private final String nickname;
+    private final String profileImg;
+    private final UserStatus userStatus;
 
 }

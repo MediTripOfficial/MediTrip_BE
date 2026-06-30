@@ -2,11 +2,11 @@ package com.meditrip.medicine.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.meditrip.common.domain.UserStatus;
 import com.meditrip.common.jwt.JwtProvider;
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.entity.enums.Gender;
 import com.meditrip.user.domain.entity.enums.Provider;
-import com.meditrip.user.domain.entity.enums.UserStatus;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +44,7 @@ public class ControllerTestSupport {
                 .provider(Provider.LOCAL)
                 .isMarketingTermsAgreed(true)
                 .status(userStatus)
+                .profileImg("profileImg.com")
                 .build();
     }
 
