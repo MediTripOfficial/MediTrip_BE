@@ -13,7 +13,9 @@ import com.meditrip.user.domain.repository.UserRepository;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
@@ -124,6 +126,16 @@ public class UserService {
                 .height(user.getHeight())
                 .age(Period.between(user.getBirth(), LocalDate.now()).getYears())
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public Map<UUID, String> getNicknamesByUserIds(List<UUID> userIds) {
+        if (userIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return userRepository.findByIdIn(userIds).stream()
+                .collect(Collectors.toMap(User::getId, User::getNickname));
     }
 
 }

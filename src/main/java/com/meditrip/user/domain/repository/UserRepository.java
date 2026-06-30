@@ -19,4 +19,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByNicknameAndStatusIn(String nickname, List<UserStatus> statuses);
 
     Optional<User> findByIdAndStatusIn(UUID id, List<UserStatus> statuses);
+
+    List<User> findByIdIn(List<UUID> ids);
+
 }
