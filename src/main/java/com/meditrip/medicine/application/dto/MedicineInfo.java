@@ -1,6 +1,6 @@
 package com.meditrip.medicine.application.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,13 +47,15 @@ public class MedicineInfo {
     @AllArgsConstructor
     public static class Review {
         private final Long id;
+        private final String nickname;
         private final String authorGender;
         private final String authorAgeGroup;
         private final String authorRegion;
-        private final Integer score;
-        private final LocalDateTime createdAt;
-        private final String symptoms;
-        private final String  review;
+        private final Double rating;
+        private final LocalDate createdAt;
+        private final List<String> symptoms;
+        private final boolean isAuthor;
+        private final String review;
     }
 
 }

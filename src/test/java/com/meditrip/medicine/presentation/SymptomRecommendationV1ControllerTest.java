@@ -13,12 +13,14 @@ import com.meditrip.medicine.domain.entity.Ingredient;
 import com.meditrip.medicine.domain.entity.Medicine;
 import com.meditrip.medicine.domain.entity.MedicineHashtags;
 import com.meditrip.medicine.domain.entity.MedicineIngredients;
+import com.meditrip.medicine.domain.entity.MedicineReview;
 import com.meditrip.medicine.domain.entity.MedicineSymptomCode;
 import com.meditrip.medicine.domain.repository.HashtagRepository;
 import com.meditrip.medicine.domain.repository.IngredientRepository;
 import com.meditrip.medicine.domain.repository.MedicineHashtagsRepository;
 import com.meditrip.medicine.domain.repository.MedicineIngredientsRepository;
 import com.meditrip.medicine.domain.repository.MedicineRepository;
+import com.meditrip.medicine.domain.repository.MedicineReviewRepository;
 import com.meditrip.medicine.domain.repository.MedicineSymptomCodeRepository;
 import com.meditrip.user.domain.entity.Allergy;
 import com.meditrip.user.domain.entity.Condition;
@@ -82,6 +84,9 @@ class SymptomRecommendationV1ControllerTest extends ControllerTestSupport {
     @Autowired
     private MedicineHashtagsRepository medicineHashtagsRepository;
 
+    @Autowired
+    private MedicineReviewRepository medicineReviewRepository;
+
     @AfterEach
     void tearDown() {
         userRepository.deleteAllInBatch();
@@ -95,6 +100,7 @@ class SymptomRecommendationV1ControllerTest extends ControllerTestSupport {
         medicineSymptomCodeRepository.deleteAllInBatch();
         hashtagRepository.deleteAllInBatch();
         medicineHashtagsRepository.deleteAllInBatch();
+        medicineReviewRepository.deleteAllInBatch();
     }
 
     private User persistUser(String country) {
@@ -148,6 +154,16 @@ class SymptomRecommendationV1ControllerTest extends ControllerTestSupport {
         return hashtagRepository.save(hashtag);
     }
 
+    private void persistReview(Long medicineId, double rating) {
+        medicineReviewRepository.save(MedicineReview.builder()
+                .medicineId(medicineId)
+                .rating(rating)
+                .review("약이 정말 좋아요")
+                .isDeleted(false)
+                .userId(UUID.randomUUID())
+                .build());
+    }
+
     private void mapMedicineToHashtag(Long medicineId, Long hashtagId) {
         medicineHashtagsRepository.save(MedicineHashtags.builder()
                 .medicineId(medicineId)
@@ -174,6 +190,9 @@ class SymptomRecommendationV1ControllerTest extends ControllerTestSupport {
         mapMedicineToIngredient(tylenol.getId(), acetaminophen.getId(), "500mg");
         mapMedicineToSymptomCode(tylenol.getId(), 11);
 
+        persistReview(tylenol.getId(), 4.0);
+        persistReview(tylenol.getId(), 5.0);
+
         Hashtag headacheTag = persistHashtag("Headache", HashtagType.DISEASE);
         mapMedicineToHashtag(tylenol.getId(), headacheTag.getId());
 
@@ -194,9 +213,13 @@ class SymptomRecommendationV1ControllerTest extends ControllerTestSupport {
         assertThat(primary.get("name").asText()).isEqualTo("Fever, Pain & Inflammation");
         assertThat(primary.get("description").asText()).isEqualTo("General & Internal Pain");
 //        assertThat(primary.get("hashtag").get(0).asText()).isEqualTo("Headache");
-        assertThat(primary.get("medicines")).hasSize(1);
-        assertThat(primary.get("medicines").get(0).get("productNameEng").asText()).isEqualTo("Tylenol");
-        assertThat(primary.get("medicines").get(0).get("purchaseLocation").get(0).asText()).isEqualTo("store");
+
+        JsonNode medicineSummary = primary.get("medicines").get(0);
+        assertThat(medicineSummary.get("productNameEng").asText()).isEqualTo("Tylenol");
+        assertThat(medicineSummary.get("purchaseLocation").get(0).asText()).isEqualTo("store");
+        assertThat(medicineSummary.get("rating").asDouble()).isEqualTo(4.5);
+        assertThat(medicineSummary.get("reviewCount").asInt()).isEqualTo(2);
+
         assertThat(primary.get("similarDrugs")).hasSize(1);
 
         JsonNode secondary = root.get("result").get("secondarySymptom");

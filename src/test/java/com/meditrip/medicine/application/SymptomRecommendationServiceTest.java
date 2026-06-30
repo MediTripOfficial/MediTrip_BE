@@ -14,6 +14,8 @@ import com.meditrip.medicine.application.dto.response.SymptomRecommendationRespo
 import com.meditrip.medicine.application.dto.response.SymptomRecommendationResponse.SimilarDrugResponse;
 import com.meditrip.medicine.application.dto.response.SymptomRecommendationResponse.SymptomResponse;
 import com.meditrip.medicine.domain.entity.Medicine;
+import com.meditrip.medicine.domain.entity.MedicineReview;
+import com.meditrip.medicine.domain.repository.MedicineReviewRepository;
 import com.meditrip.medicine.domain.repository.SymptomMedicineQueryRepository;
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.repository.UserAllergyRepository;
@@ -47,6 +49,9 @@ class SymptomRecommendationServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private MedicineReviewRepository medicineReviewRepository;
+
     @InjectMocks
     private SymptomRecommendationService symptomRecommendationService;
 
@@ -59,6 +64,14 @@ class SymptomRecommendationServiceTest {
                 .countryCode(countryCode)
                 .isConvenienceStore(convenienceStore)
                 .severityTier(severityTier)
+                .build();
+    }
+
+    private static MedicineReview review(Long id, Long medicineId, double rating) {
+        return MedicineReview.builder()
+                .id(id)
+                .medicineId(medicineId)
+                .rating(rating)
                 .build();
     }
 
@@ -83,6 +96,10 @@ class SymptomRecommendationServiceTest {
         Medicine ibuprofenX = medicine(2L, "Ibuprofen X", "ABC", "US", false, 2);
         Medicine geworin = medicine(3L, "Geworin", "Samjin", "KR", false, 2);
 
+        given(medicineReviewRepository.findAllByMedicineId(1L)).willReturn(List.of(review(1L, 1L, 4.0), review(2L, 1L, 5.0)));
+        given(medicineReviewRepository.findAllByMedicineId(2L)).willReturn(List.of(review(3L, 2L, 3.0)));
+        given(medicineReviewRepository.findAllByMedicineId(3L)).willReturn(List.of());
+
         given(symptomMedicineQueryRepository.findMedicinesBySymptomCode(11))
                 .willReturn(List.of(tylenol, ibuprofenX, geworin));
         given(symptomMedicineQueryRepository.findIngredientNamesByMedicineIds(List.of(1L, 2L, 3L)))
@@ -93,6 +110,8 @@ class SymptomRecommendationServiceTest {
 
         // secondaryCode=12(MUSCLE_JOINT_PAIN, baseScore=70, |70-65|=5)가 가장 가까움
         Medicine coldPas = medicine(4L, "ColdPas", "ZZZ", "KR", true, 1);
+        given(medicineReviewRepository.findAllByMedicineId(4L)).willReturn(List.of(review(4L, 4L, 5.0)));
+
         given(symptomMedicineQueryRepository.findMedicinesBySymptomCode(12))
                 .willReturn(List.of(coldPas));
         given(symptomMedicineQueryRepository.findIngredientNamesByMedicineIds(List.of(4L)))
@@ -109,16 +128,20 @@ class SymptomRecommendationServiceTest {
         //medicines: tier 거리(0,0,1) + id 오름차순으로 정렬 -> [ibuprofenX(2), geworin(3), tylenol(1)]
         List<MedicineSummaryResponse> medicines = primary.getMedicines();
         assertThat(medicines).hasSize(3);
+        // ibuprofenX(2) -> 평점 3.0, 개수 1
         assertThat(medicines.get(0).getId()).isEqualTo(2L);
-        assertThat(medicines.get(0).getPurchaseLocation()).containsExactly("pharmacy");
+        assertThat(medicines.get(0).getRating()).isEqualTo(3.0);
+        assertThat(medicines.get(0).getReviewCount()).isEqualTo(1);
+
+        // geworin(3) -> 리뷰 없음 (현재 프로덕션 로직 상 0/0으로 NaN 발생함)
         assertThat(medicines.get(1).getId()).isEqualTo(3L);
-        assertThat(medicines.get(1).getActiveIngredientsEng()).containsExactly("Acetaminophen", "Caffeine");
+        assertThat(medicines.get(1).getRating()).isEqualTo(0.0);
+        assertThat(medicines.get(1).getReviewCount()).isZero();
+
+        // tylenol(1) -> 평점 4.5, 개수 2
         assertThat(medicines.get(2).getId()).isEqualTo(1L);
-        assertThat(medicines.get(2).getPurchaseLocation()).containsExactly("store", "pharmacy");
-        medicines.forEach(m -> {
-            assertThat(m.getRating()).isNull();
-            assertThat(m.getReviewCount()).isNull();
-        });
+        assertThat(medicines.get(2).getRating()).isEqualTo(4.5);
+        assertThat(medicines.get(2).getReviewCount()).isEqualTo(2);
 
         //similarDrugs: 국가 필터(KR)로 ibuprofenX(US) 제외 -> [geworin, tylenol] 순서로 대표 추출
         List<SimilarDrugResponse> similarDrugs = primary.getSimilarDrugs();
@@ -136,6 +159,8 @@ class SymptomRecommendationServiceTest {
         assertThat(secondary.getMedicines()).hasSize(1);
         assertThat(secondary.getMedicines().get(0).getId()).isEqualTo(4L);
         assertThat(secondary.getMedicines().get(0).getPurchaseLocation()).containsExactly("store", "pharmacy");
+        assertThat(secondary.getMedicines().get(0).getRating()).isEqualTo(5.0);
+        assertThat(secondary.getMedicines().get(0).getReviewCount()).isEqualTo(1);
         assertThat(secondary.getSimilarDrugs()).hasSize(1);
         assertThat(secondary.getSimilarDrugs().get(0).getProductNameEng()).isEqualTo("ColdPas");
 

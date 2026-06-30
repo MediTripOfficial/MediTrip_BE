@@ -9,6 +9,8 @@ import com.meditrip.medicine.application.dto.response.SymptomRecommendationRespo
 import com.meditrip.medicine.domain.ContraindicationPolicy;
 import com.meditrip.medicine.domain.SymptomCode;
 import com.meditrip.medicine.domain.entity.Medicine;
+import com.meditrip.medicine.domain.entity.MedicineReview;
+import com.meditrip.medicine.domain.repository.MedicineReviewRepository;
 import com.meditrip.medicine.domain.repository.SymptomMedicineQueryRepository;
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.repository.UserAllergyRepository;
@@ -39,6 +41,7 @@ public class SymptomRecommendationService {
     private final UserConditionRepository userConditionRepository;
     private final UserAllergyRepository userAllergyRepository;
     private final UserRepository userRepository;
+    private final MedicineReviewRepository medicineReviewRepository;
 
     @Transactional(readOnly = true)
     public SymptomRecommendationResponse recommend(SymptomRecommendationApplicationRequest request, UUID userId) {
@@ -84,8 +87,8 @@ public class SymptomRecommendationService {
         List<Medicine> sortedMedicines = sortByTierCloseness(bundle.medicines(), totalScore);
 
         List<MedicineSummaryResponse> medicineResponses = sortedMedicines.stream()
-                .map(medicine -> toMedicineSummary(medicine,
-                        bundle.ingredientsByMedicineId().getOrDefault(medicine.getId(), List.of())))
+                .map(medicine -> toMedicineSummary(
+                        medicine, bundle.ingredientsByMedicineId().getOrDefault(medicine.getId(), List.of())))
                 .toList();
 
         List<Medicine> medicinesForSimilarDrugs = filterByCountry(sortedMedicines, userCountry);
@@ -167,6 +170,11 @@ public class SymptomRecommendationService {
     }
 
     private MedicineSummaryResponse toMedicineSummary(Medicine medicine, List<String> ingredientNames) {
+        List<MedicineReview> medicineReviews = medicineReviewRepository.findAllByMedicineId(medicine.getId());
+
+        double rating = medicineReviews.isEmpty() ? 0.0
+                : medicineReviews.stream().mapToDouble(MedicineReview::getRating).average().orElse(0.0);
+
         boolean isConvenienceStore = Boolean.TRUE.equals(medicine.getIsConvenienceStore());
         List<String> purchaseLocation = isConvenienceStore
                 ? List.of("store", "pharmacy")
@@ -179,8 +187,8 @@ public class SymptomRecommendationService {
                 .activeIngredientsEng(ingredientNames)
                 .purchaseLocation(purchaseLocation)
                 .imageUrl(medicine.getImageUrl())
-                .rating(null) // TODO: 리뷰 기능 추가 후 변경
-                .reviewCount(null)
+                .rating(rating)
+                .reviewCount(medicineReviews.size())
                 .build();
     }
 

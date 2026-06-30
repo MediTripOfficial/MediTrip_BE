@@ -1,7 +1,7 @@
 package com.meditrip.medicine.application.dto.response;
 
 import com.meditrip.medicine.application.dto.MedicineInfo;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -87,12 +87,14 @@ public class MedicineResponse {
     @AllArgsConstructor
     public static class Review {
         private final Long id;
+        private final String nickname;
         private final String authorGender;
         private final String authorAgeGroup;
         private final String authorRegion;
-        private final Integer score;
-        private final LocalDateTime createdAt;
-        private final String symptoms;
+        private final Double rating;
+        private final LocalDate createdAt;
+        private final List<String> symptoms;
+        private final boolean isAuthor;
         private final String review;
 
         public static Review of(MedicineInfo.Review review) {
@@ -101,10 +103,12 @@ public class MedicineResponse {
                     .authorGender(review.getAuthorGender())
                     .authorAgeGroup(review.getAuthorAgeGroup())
                     .authorRegion(review.getAuthorRegion())
-                    .score(review.getScore())
+                    .rating(review.getRating())
                     .createdAt(review.getCreatedAt())
                     .symptoms(review.getSymptoms())
                     .review(review.getReview())
+                    .isAuthor(review.isAuthor())
+                    .nickname(review.getNickname())
                     .build();
         }
     }
