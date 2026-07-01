@@ -218,6 +218,7 @@ public class SymptomRecommendationService {
                         .productNameEng(entry.getValue().getNameEn())
                         .manufacturer(entry.getValue().getManufacturerEn())
                         .activeIngredientsEng(entry.getKey())
+                        .country(entry.getValue().getCountryCode())
                         .build())
                 .toList();
     }
