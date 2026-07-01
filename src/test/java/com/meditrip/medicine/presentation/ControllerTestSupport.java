@@ -44,7 +44,6 @@ public class ControllerTestSupport {
                 .provider(Provider.LOCAL)
                 .isMarketingTermsAgreed(true)
                 .status(userStatus)
-                .profileImg("profileImg.com")
                 .build();
     }
 
