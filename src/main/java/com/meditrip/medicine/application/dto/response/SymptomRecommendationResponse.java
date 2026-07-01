@@ -38,6 +38,7 @@ public class SymptomRecommendationResponse {
         private final String productNameEng;
         private final String manufacturer;
         private final List<String> activeIngredientsEng;
+        private final String country;
     }
 
     @Getter

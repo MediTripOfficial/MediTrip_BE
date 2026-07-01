@@ -288,7 +288,7 @@ class SymptomRecommendationServiceTest {
     }
 
     @Test
-    @DisplayName("사용자 국가와 일치하는 약이 하나도 없으면 국가 필터 없이 전체에서 similarDrugs 대표를 뽑는다 (fallback)")
+    @DisplayName("사용자 국가와 일치하는 약이 하나도 없으면 null을 출력한다.")
     void recommend_fallsBackToAllMedicines_whenNoMedicineMatchesUserCountry() {
         //given
         UUID userId = UUID.randomUUID();
@@ -312,14 +312,12 @@ class SymptomRecommendationServiceTest {
         //when
         SymptomRecommendationResponse response = symptomRecommendationService.recommend(request, userId);
 
-        //then. KR과 일치하는 약이 없지만 similarDrugs가 비어있지 않고 US 약이 그대로 나옴(fallback)
-        assertThat(response.getResult().getPrimarySymptom().getSimilarDrugs()).hasSize(1);
-        assertThat(response.getResult().getPrimarySymptom().getSimilarDrugs().get(0).getProductNameEng())
-                .isEqualTo("USOnly");
+        //then
+        assertThat(response.getResult().getPrimarySymptom().getSimilarDrugs()).hasSize(0);
     }
 
     @Test
-    @DisplayName("User.country가 빈 문자열이면 국가 필터를 적용하지 않는다 (null과 동일하게 취급)")
+    @DisplayName("User.country가 빈 문자열이면 국가 필터를 적용하지 않는다.")
     void recommend_doesNotFilterByCountry_whenUserCountryIsBlank() {
         //given
         UUID userId = UUID.randomUUID();
@@ -345,8 +343,8 @@ class SymptomRecommendationServiceTest {
         //when
         SymptomRecommendationResponse response = symptomRecommendationService.recommend(request, userId);
 
-        //then. 필터링 없이 둘 다 similarDrugs 대표 후보가 됨
-        assertThat(response.getResult().getPrimarySymptom().getSimilarDrugs()).hasSize(2);
+        //then
+        assertThat(response.getResult().getPrimarySymptom().getSimilarDrugs()).hasSize(0);
     }
 
     @Test
@@ -436,7 +434,7 @@ class SymptomRecommendationServiceTest {
         SymptomRecommendationResponse response = symptomRecommendationService.recommend(request, userId);
 
         //then
-        assertThat(response.getResult().getPrimarySymptom().getSimilarDrugs()).hasSize(1);
+        assertThat(response.getResult().getPrimarySymptom().getSimilarDrugs()).hasSize(0);
         then(userRepository).should(times(1)).findById(userId);
     }
 

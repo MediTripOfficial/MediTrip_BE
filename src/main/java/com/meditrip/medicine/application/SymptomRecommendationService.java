@@ -112,14 +112,12 @@ public class SymptomRecommendationService {
 
     private List<Medicine> filterByCountry(List<Medicine> medicines, String userCountry) {
         if (userCountry == null || userCountry.isBlank()) {
-            return medicines;
+            return List.of();
         }
 
-        List<Medicine> filtered = medicines.stream()
+        return medicines.stream()
                 .filter(medicine -> userCountry.equalsIgnoreCase(medicine.getCountryCode()))
                 .toList();
-
-        return filtered.isEmpty() ? medicines : filtered;
     }
 
     private SymptomCode resolveClosestSiblingByScore(SymptomCode primaryCode, int totalScore) {
@@ -220,6 +218,7 @@ public class SymptomRecommendationService {
                         .productNameEng(entry.getValue().getNameEn())
                         .manufacturer(entry.getValue().getManufacturerEn())
                         .activeIngredientsEng(entry.getKey())
+                        .country(entry.getValue().getCountryCode())
                         .build())
                 .toList();
     }
