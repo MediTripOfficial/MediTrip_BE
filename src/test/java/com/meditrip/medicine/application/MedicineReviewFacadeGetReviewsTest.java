@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.meditrip.common.response.CursorResponse;
+import com.meditrip.medicine.application.dto.ReviewAuthorInfo;
 import com.meditrip.medicine.application.dto.request.GetMedicineReviewsApplicationRequest;
 import com.meditrip.medicine.application.dto.response.MedicineReviewsResponse;
 import com.meditrip.medicine.domain.ReviewSortType;
@@ -50,7 +51,7 @@ class MedicineReviewFacadeGetReviewsTest {
 
     private static MedicineReview review(Long id, UUID userId) {
         MedicineReview review = MedicineReview.create(
-                1L, "약이 정말 좋네요.", 25, 170.0, 60.0, 5.0, "Female", "KR", userId, "Headache");
+                1L, "약이 정말 좋네요.", 170.0, 60.0, 5.0, "Female", "KR", userId, "Headache");
         ReflectionTestUtils.setField(review, "id", id);
         ReflectionTestUtils.setField(review, "createdAt", Instant.now());
         return review;
@@ -79,7 +80,13 @@ class MedicineReviewFacadeGetReviewsTest {
         given(medicineService.existsById(medicineId)).willReturn(true);
         given(medicineReviewQueryRepository.findReviews(medicineId, null, 16, ReviewSortType.LATEST, null, null,
                 null)).willReturn(List.of(review));
-        given(userService.getNicknamesByUserIds(List.of(authorId))).willReturn(Map.of(authorId, "닉네임"));
+
+        ReviewAuthorInfo reviewAuthorInfo = ReviewAuthorInfo.builder()
+                .age(28)
+                .profileImg("https://profile.img/qwer")
+                .nickname("닉네임")
+                .build();
+        given(userService.getReviewAuthorInfoByUserIds(List.of(authorId))).willReturn(Map.of(authorId, reviewAuthorInfo));
 
         //when
         CursorResponse<MedicineReviewsResponse> response = medicineReviewFacade.getReviews(userId, medicineId, request);
@@ -87,6 +94,7 @@ class MedicineReviewFacadeGetReviewsTest {
         //then
         assertThat(response.getItems()).hasSize(1);
         assertThat(response.getItems().get(0).getNickname()).isEqualTo("닉네임");
+        assertThat(response.getItems().get(0).getAuthorAgeGroup()).isEqualTo("20s");
         assertThat(response.getItems().get(0).isAuthor()).isFalse();
         assertThat(response.isHasNext()).isFalse();
         assertThat(response.getNextCursor()).isNull();
@@ -94,7 +102,7 @@ class MedicineReviewFacadeGetReviewsTest {
         verify(medicineService, times(1)).existsById(medicineId);
         verify(medicineReviewQueryRepository, times(1))
                 .findReviews(medicineId, null, 16, ReviewSortType.LATEST, null, null, null);
-        verify(userService, times(1)).getNicknamesByUserIds(List.of(authorId));
+        verify(userService, times(1)).getReviewAuthorInfoByUserIds(List.of(authorId));
     }
 
     @DisplayName("조회한 리뷰가 본인이 작성한 리뷰면 isAuthor가 true로 응답된다.")
@@ -115,7 +123,13 @@ class MedicineReviewFacadeGetReviewsTest {
         given(medicineService.existsById(medicineId)).willReturn(true);
         given(medicineReviewQueryRepository.findReviews(medicineId, null, 16, ReviewSortType.LATEST, null, null,
                 null)).willReturn(List.of(ownReview));
-        given(userService.getNicknamesByUserIds(List.of(userId))).willReturn(Map.of(userId, "닉네임"));
+
+        ReviewAuthorInfo reviewAuthorInfo = ReviewAuthorInfo.builder()
+                .age(28)
+                .profileImg("https://profile.img/qwer")
+                .nickname("닉네임")
+                .build();
+        given(userService.getReviewAuthorInfoByUserIds(List.of(userId))).willReturn(Map.of(userId, reviewAuthorInfo));
 
         //when
         CursorResponse<MedicineReviewsResponse> response = medicineReviewFacade.getReviews(userId, medicineId, request);
@@ -140,7 +154,7 @@ class MedicineReviewFacadeGetReviewsTest {
         given(medicineService.existsById(medicineId)).willReturn(true);
         given(medicineReviewQueryRepository.findReviews(medicineId, null, 16, ReviewSortType.LATEST, null, null,
                 null)).willReturn(List.of());
-        given(userService.getNicknamesByUserIds(List.of())).willReturn(Map.of());
+        given(userService.getReviewAuthorInfoByUserIds(List.of())).willReturn(Map.of());
 
         //when
         medicineReviewFacade.getReviews(userId, medicineId, request);
@@ -171,7 +185,13 @@ class MedicineReviewFacadeGetReviewsTest {
         given(medicineService.existsById(medicineId)).willReturn(true);
         given(medicineReviewQueryRepository.findReviews(medicineId, null, 3, ReviewSortType.LATEST, null, null,
                 null)).willReturn(List.of(first, second, third));
-        given(userService.getNicknamesByUserIds(List.of(authorId))).willReturn(Map.of(authorId, "닉네임"));
+
+        ReviewAuthorInfo reviewAuthorInfo = ReviewAuthorInfo.builder()
+                .age(28)
+                .profileImg("https://profile.img/qwer")
+                .nickname("닉네임")
+                .build();
+        given(userService.getReviewAuthorInfoByUserIds(List.of(authorId))).willReturn(Map.of(authorId, reviewAuthorInfo));
 
         //when
         CursorResponse<MedicineReviewsResponse> response = medicineReviewFacade.getReviews(userId, medicineId, request);
@@ -201,7 +221,13 @@ class MedicineReviewFacadeGetReviewsTest {
         given(medicineService.existsById(medicineId)).willReturn(true);
         given(medicineReviewQueryRepository.findReviews(medicineId, null, 3, ReviewSortType.LATEST, null, null,
                 null)).willReturn(List.of(onlyReview));
-        given(userService.getNicknamesByUserIds(List.of(authorId))).willReturn(Map.of(authorId, "닉네임"));
+
+        ReviewAuthorInfo reviewAuthorInfo = ReviewAuthorInfo.builder()
+                .age(28)
+                .profileImg("https://profile.img/qwer")
+                .nickname("닉네임")
+                .build();
+        given(userService.getReviewAuthorInfoByUserIds(List.of(authorId))).willReturn(Map.of(authorId, reviewAuthorInfo));
 
         //when
         CursorResponse<MedicineReviewsResponse> response = medicineReviewFacade.getReviews(userId, medicineId, request);
@@ -232,14 +258,20 @@ class MedicineReviewFacadeGetReviewsTest {
         given(medicineService.existsById(medicineId)).willReturn(true);
         given(medicineReviewQueryRepository.findReviews(medicineId, null, 16, ReviewSortType.LATEST, null, null,
                 null)).willReturn(List.of(firstReview, secondReview));
-        given(userService.getNicknamesByUserIds(List.of(authorId))).willReturn(Map.of(authorId, "닉네임"));
+
+        ReviewAuthorInfo reviewAuthorInfo = ReviewAuthorInfo.builder()
+                .age(28)
+                .profileImg("https://profile.img/qwer")
+                .nickname("닉네임")
+                .build();
+        given(userService.getReviewAuthorInfoByUserIds(List.of(authorId))).willReturn(Map.of(authorId, reviewAuthorInfo));
 
         //when
         CursorResponse<MedicineReviewsResponse> response = medicineReviewFacade.getReviews(userId, medicineId, request);
 
         //then
         assertThat(response.getItems()).hasSize(2);
-        verify(userService, times(1)).getNicknamesByUserIds(List.of(authorId));
+        verify(userService, times(1)).getReviewAuthorInfoByUserIds(List.of(authorId));
     }
 
     @DisplayName("조회된 리뷰가 없으면 빈 목록과 hasNext false, nextCursor null을 반환하고, 닉네임 조회는 빈 리스트로 호출된다.")
@@ -258,7 +290,7 @@ class MedicineReviewFacadeGetReviewsTest {
         given(medicineService.existsById(medicineId)).willReturn(true);
         given(medicineReviewQueryRepository.findReviews(medicineId, null, 16, ReviewSortType.LATEST, null, null,
                 null)).willReturn(List.of());
-        given(userService.getNicknamesByUserIds(List.of())).willReturn(Map.of());
+        given(userService.getReviewAuthorInfoByUserIds(List.of())).willReturn(Map.of());
 
         //when
         CursorResponse<MedicineReviewsResponse> response = medicineReviewFacade.getReviews(userId, medicineId, request);
@@ -291,7 +323,7 @@ class MedicineReviewFacadeGetReviewsTest {
 
         verify(medicineService, times(1)).existsById(medicineId);
         verify(medicineReviewQueryRepository, never()).findReviews(any(), any(), anyInt(), any(), any(), any(), any());
-        verify(userService, never()).getNicknamesByUserIds(anyList());
+        verify(userService, never()).getReviewAuthorInfoByUserIds(anyList());
     }
 
     @DisplayName("필터(gender, countries, symptoms)를 그대로 쿼리 레포지토리에 전달한다.")
@@ -318,7 +350,7 @@ class MedicineReviewFacadeGetReviewsTest {
         given(medicineService.existsById(medicineId)).willReturn(true);
         given(medicineReviewQueryRepository.findReviews(medicineId, 100L, 11, ReviewSortType.HIGHEST_RATING, genders,
                 countries, symptoms)).willReturn(List.of());
-        given(userService.getNicknamesByUserIds(List.of())).willReturn(Map.of());
+        given(userService.getReviewAuthorInfoByUserIds(List.of())).willReturn(Map.of());
 
         //when
         medicineReviewFacade.getReviews(userId, medicineId, request);

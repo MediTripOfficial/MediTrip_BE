@@ -27,7 +27,7 @@ class MedicineReviewV1controllerDeleteTest extends ControllerTestSupport {
     }
 
     private MedicineReview persistReview(UUID authorId) {
-        MedicineReview review = MedicineReview.create(1L, "약이 정말 좋네요.", 25, 170.0, 60.0, 5.0, "Female", "KR", authorId,
+        MedicineReview review = MedicineReview.create(1L, "약이 정말 좋네요.", 170.0, 60.0, 5.0, "Female", "KR", authorId,
                 "Headache");
         return medicineReviewRepository.save(review);
     }
