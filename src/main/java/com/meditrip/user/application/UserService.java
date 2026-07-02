@@ -3,6 +3,7 @@ package com.meditrip.user.application;
 import com.meditrip.common.domain.UserStatus;
 import com.meditrip.common.exception.NotFoundException;
 import com.meditrip.common.util.SecurityUtils;
+import com.meditrip.medicine.application.dto.ReviewAuthorInfo;
 import com.meditrip.medicine.domain.UserInfo;
 import com.meditrip.user.application.dto.response.UserInfoResponse;
 import com.meditrip.user.domain.entity.User;
@@ -10,8 +11,6 @@ import com.meditrip.user.domain.exception.UserNotFoundException;
 import com.meditrip.user.domain.repository.UserAllergyRepository;
 import com.meditrip.user.domain.repository.UserConditionRepository;
 import com.meditrip.user.domain.repository.UserRepository;
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -128,7 +127,7 @@ public class UserService {
                 .country(user.get().getCountry())
                 .weight(user.get().getWeight())
                 .height(user.get().getHeight())
-                .age(Period.between(user.get().getBirth(), LocalDate.now()).getYears())
+                .age(user.get().getAge())
                 .nickname(user.get().getNickname())
                 .profileImg(user.get().getProfileImg())
                 .userStatus(user.get().getStatus())
@@ -136,25 +135,17 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public Map<UUID, String> getNicknamesByUserIds(List<UUID> userIds) {
+    public Map<UUID, ReviewAuthorInfo> getReviewAuthorInfoByUserIds(List<UUID> userIds) {
         if (userIds.isEmpty()) {
             return Map.of();
         }
 
         return userRepository.findByIdIn(userIds).stream()
-                .collect(Collectors.toMap(User::getId, User::getNickname));
-    }
-
-    public Map<UUID, String> getProfileImgsByUserIds(List<UUID> userIds) {
-        if (userIds.isEmpty()) {
-            return Map.of();
-        }
-
-        return userRepository.findByIdIn(userIds).stream()
-                .collect(Collectors.toMap(
-                        User::getId,
-                        user -> user.getProfileImg() == null ? "" : user.getProfileImg()
-                ));
+                .collect(Collectors.toMap(User::getId, u -> ReviewAuthorInfo.builder()
+                        .nickname(u.getNickname())
+                        .profileImg(u.getProfileImg())
+                        .age(u.getAge())
+                        .build()));
     }
 
 }

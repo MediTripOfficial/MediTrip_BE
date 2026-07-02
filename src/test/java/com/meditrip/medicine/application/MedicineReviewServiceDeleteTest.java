@@ -30,7 +30,7 @@ class MedicineReviewServiceDeleteTest {
 
     private static MedicineReview activeReview(UUID authorId) {
         return MedicineReview.create(
-                1L, "약이 정말 좋네요.", 25, 170.0, 60.0, 5.0, "Female", "KR", authorId, "Headache");
+                1L, "약이 정말 좋네요.", 170.0, 60.0, 5.0, "Female", "KR", authorId, "Headache");
     }
 
     @DisplayName("본인이 작성한 리뷰를 삭제하면 isDeleted가 true로 바뀐다.")

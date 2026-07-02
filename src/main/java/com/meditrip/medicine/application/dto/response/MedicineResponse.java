@@ -96,11 +96,11 @@ public class MedicineResponse {
         private final String review;
         private final String profileImg;
 
-        public static Review of(MedicineReview review, String nickname, String profileImg) {
+        public static Review of(MedicineReview review, String nickname, String profileImg, Integer age) {
             return Review.builder()
                     .id(review.getId())
                     .authorGender(review.getGender())
-                    .authorAgeGroup(toAgeGroup(review.getAge()))
+                    .authorAgeGroup(toAgeGroup(age))
                     .authorRegion(review.getCountry())
                     .rating(review.getRating())
                     .createdAt(review.getCreatedAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDate())

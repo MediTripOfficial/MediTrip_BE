@@ -33,7 +33,7 @@ class MedicineReviewQueryRepositoryTest {
     private MedicineReview persistReview(Long medicineId, Double rating, String gender, String country,
                                          String symptom) {
         MedicineReview review = MedicineReview.create(
-                medicineId, "리뷰 내용", 25, 170.0, 60.0, rating, gender, country, UUID.randomUUID(), symptom);
+                medicineId, "리뷰 내용", 170.0, 60.0, rating, gender, country, UUID.randomUUID(), symptom);
         return medicineReviewRepository.save(review);
     }
 

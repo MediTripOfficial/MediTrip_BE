@@ -12,6 +12,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -206,4 +207,13 @@ public class User extends BaseEntity {
     public void withdrawn() {
         this.status = UserStatus.WITHDRAWN;
     }
+
+    public Integer getAge() {
+        if (birth == null) {
+            return null;
+        }
+
+        return Period.between(birth, LocalDate.now()).getYears();
+    }
+
 }

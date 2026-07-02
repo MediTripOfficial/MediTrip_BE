@@ -44,8 +44,9 @@ public class MedicineFacade {
 
         String nickname = userInfo == null ? "탈퇴한 유저" : userInfo.getNickname();
         String profileImg = userInfo == null ? null : userInfo.getProfileImg();
+        Integer age = userInfo == null ? null : userInfo.getAge();
 
-        return MedicineResponse.Review.of(topReview, nickname, profileImg);
+        return MedicineResponse.Review.of(topReview, nickname, profileImg, age);
     }
 
 }

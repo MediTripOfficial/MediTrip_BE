@@ -110,7 +110,7 @@ class MedicineServiceGetMedicineInfoTest {
         //given
         Long medicineId = 1L;
         MedicineReview latestReview = MedicineReview.create(
-                medicineId, "최고예요", 25, 170.0, 60.0, 5.0, "Female", "KR", UUID.randomUUID(), "Headache");
+                medicineId, "최고예요", 170.0, 60.0, 5.0, "Female", "KR", UUID.randomUUID(), "Headache");
 
         given(medicineReviewRepository.findTopByMedicineIdAndIsDeletedFalseOrderByIdDesc(medicineId))
                 .willReturn(Optional.of(latestReview));

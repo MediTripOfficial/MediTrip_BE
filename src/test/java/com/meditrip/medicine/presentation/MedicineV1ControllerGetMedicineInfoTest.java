@@ -97,7 +97,7 @@ class MedicineV1ControllerGetMedicineInfoTest extends ControllerTestSupport {
 
     private MedicineReview persistReview(Long medicineId, UUID authorId, Double rating) {
         MedicineReview review = MedicineReview.create(
-                medicineId, "약이 정말 좋네요.", 28, 165.0, 55.0, rating, "Female", "KR", authorId, "Headache");
+                medicineId, "약이 정말 좋네요.", 165.0, 55.0, rating, "Female", "KR", authorId, "Headache");
         return medicineReviewRepository.save(review);
     }
 
