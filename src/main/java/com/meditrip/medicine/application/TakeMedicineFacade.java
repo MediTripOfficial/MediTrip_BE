@@ -1,5 +1,6 @@
 package com.meditrip.medicine.application;
 
+import com.meditrip.medicine.application.dto.request.UpdateTakeMedicineApplicationRequest;
 import com.meditrip.medicine.domain.exception.MedicineNotFoundException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,11 @@ public class TakeMedicineFacade {
         }
 
         return takeMedicineService.take(medicineId, userId);
+    }
+
+    public void recordFollowUp(UpdateTakeMedicineApplicationRequest request, UUID userId) {
+        log.info("복약 팔로우업 기록 요청. User Id : [{}], intakeId : [{}]", userId, request.getHistoryId());
+        takeMedicineService.applyFollowUp(request.getHistoryId(), userId, request.getCondition());
     }
 
 }

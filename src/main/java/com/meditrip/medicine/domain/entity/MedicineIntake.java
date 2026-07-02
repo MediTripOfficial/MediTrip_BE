@@ -51,4 +51,8 @@ public class MedicineIntake {
                 .build();
     }
 
+    public void applyFollowUp(TakeMedicineCondition lastCondition, Instant lastTakenAt) {
+        this.lastCondition = lastCondition;
+        this.lastTakenAt = lastTakenAt;
+    }
 }
