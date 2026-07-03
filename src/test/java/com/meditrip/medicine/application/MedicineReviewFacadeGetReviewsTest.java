@@ -95,6 +95,7 @@ class MedicineReviewFacadeGetReviewsTest {
         assertThat(response.getItems()).hasSize(1);
         assertThat(response.getItems().get(0).getNickname()).isEqualTo("닉네임");
         assertThat(response.getItems().get(0).getAuthorAgeGroup()).isEqualTo("20s");
+        assertThat(response.getItems().get(0).getUserProfileImg()).isEqualTo("https://profile.img/qwer");
         assertThat(response.getItems().get(0).isAuthor()).isFalse();
         assertThat(response.isHasNext()).isFalse();
         assertThat(response.getNextCursor()).isNull();

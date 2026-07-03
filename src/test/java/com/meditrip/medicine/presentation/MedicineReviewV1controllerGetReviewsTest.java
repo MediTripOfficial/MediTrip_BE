@@ -15,7 +15,7 @@ import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.repository.UserRepository;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +35,8 @@ class MedicineReviewV1controllerGetReviewsTest extends ControllerTestSupport {
     @Autowired
     private MedicineReviewRepository medicineReviewRepository;
 
-    @BeforeEach
-    void setUp() {
+    @AfterEach
+    void tearDown() {
         userRepository.deleteAllInBatch();
         medicineRepository.deleteAllInBatch();
         medicineReviewRepository.deleteAllInBatch();
