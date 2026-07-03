@@ -18,7 +18,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 class TakeMedicineV1ControllerUpdateTakeMedicineTest extends ControllerTestSupport {
 
     @Autowired
@@ -50,6 +52,7 @@ class TakeMedicineV1ControllerUpdateTakeMedicineTest extends ControllerTestSuppo
                 .build();
 
         MedicineIntake savedMedicineIntake = medicineIntakeRepository.save(medicineIntake);
+        Instant beforeLastTakenAt = savedMedicineIntake.getLastTakenAt();
 
         String accessToken = jwtProvider.generateAccessToken(userId.toString());
 
@@ -68,7 +71,7 @@ class TakeMedicineV1ControllerUpdateTakeMedicineTest extends ControllerTestSuppo
         MedicineIntake after = medicineIntakeRepository.findById(savedMedicineIntake.getId()).orElseThrow();
 
         assertThat(after.getLastTakenAt()).isNotNull();
-        assertThat(after.getLastTakenAt()).isNotEqualTo(medicineIntake.getLastTakenAt());
+        assertThat(after.getLastTakenAt()).isNotEqualTo(beforeLastTakenAt);
         assertThat(after.getLastCondition()).isEqualTo(TakeMedicineCondition.G);
 
         assertThat(medicineIntakeLogRepository.count()).isOne();
