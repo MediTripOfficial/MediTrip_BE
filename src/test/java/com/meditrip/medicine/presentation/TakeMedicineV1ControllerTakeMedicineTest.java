@@ -2,7 +2,6 @@ package com.meditrip.medicine.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -11,11 +10,12 @@ import com.meditrip.medicine.domain.entity.MedicineIntake;
 import com.meditrip.medicine.domain.repository.MedicineIntakeRepository;
 import com.meditrip.medicine.domain.repository.MedicineRepository;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
@@ -27,8 +27,8 @@ class TakeMedicineV1ControllerTakeMedicineTest extends ControllerTestSupport {
     @Autowired
     private MedicineRepository medicineRepository;
 
-    @BeforeEach
-    void setUp() {
+    @AfterEach
+    void tearDown() {
         medicineIntakeRepository.deleteAllInBatch();
         medicineRepository.deleteAllInBatch();
     }
@@ -48,14 +48,17 @@ class TakeMedicineV1ControllerTakeMedicineTest extends ControllerTestSupport {
         String accessToken = jwtProvider.generateAccessToken(userId.toString());
 
         //when
-        mockMvc.perform(post("/api/v1/medicines/me")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer "+accessToken)
-                .param("medicineId", String.valueOf(savedMedicine.getId())))
+        MvcResult mvcResult = mockMvc.perform(post("/api/v1/medicines/me")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                        .param("medicineId", String.valueOf(savedMedicine.getId())))
                 .andExpect(status().isCreated())
-                .andExpect(header().string(HttpHeaders.LOCATION, "/api/v1/medicines/me/1"));
+                .andReturn();
 
         //then
-        MedicineIntake after = medicineIntakeRepository.findById(1L).orElseThrow();
+        String location = mvcResult.getResponse().getHeader(HttpHeaders.LOCATION);
+        Long intakeId = Long.valueOf(location.substring(location.lastIndexOf("/") + 1));
+
+        MedicineIntake after = medicineIntakeRepository.findById(intakeId).orElseThrow();
         assertThat(after.getMedicineId()).isEqualTo(savedMedicine.getId());
         assertThat(after.getUserId()).isEqualTo(userId);
         assertThat(after.getFirstTakenAt()).isNotNull();

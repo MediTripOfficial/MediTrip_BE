@@ -45,7 +45,7 @@ class TakeMedicineV1ControllerUpdateTakeMedicineTest extends ControllerTestSuppo
                 .userId(userId)
                 .isDeleted(false)
                 .firstTakenAt(Instant.now().minusSeconds(10000))
-                .lastTakenAt(Instant.now().minusSeconds(100))
+                .lastTakenAt(Instant.now().minusSeconds(1000000000))
                 .lastCondition(TakeMedicineCondition.W)
                 .build();
 

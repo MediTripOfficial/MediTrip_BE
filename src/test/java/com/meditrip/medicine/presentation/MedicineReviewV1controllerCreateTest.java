@@ -2,7 +2,6 @@ package com.meditrip.medicine.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -15,7 +14,7 @@ import com.meditrip.medicine.presentation.dto.request.CreateMedicineReviewReques
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.repository.UserRepository;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,6 +22,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
@@ -37,8 +37,8 @@ class MedicineReviewV1controllerCreateTest extends ControllerTestSupport {
     @Autowired
     private MedicineReviewRepository medicineReviewRepository;
 
-    @BeforeEach
-    void setUp() {
+    @AfterEach
+    void tearDown() {
         userRepository.deleteAllInBatch();
         medicineRepository.deleteAllInBatch();
         medicineReviewRepository.deleteAllInBatch();
@@ -68,15 +68,18 @@ class MedicineReviewV1controllerCreateTest extends ControllerTestSupport {
         String accessToken = jwtProvider.generateAccessToken(userId.toString());
 
         //when
-        mockMvc.perform(post("/api/v1/medicines/" + savedMedicine.getId() + "/reviews")
+        MvcResult mvcResult = mockMvc.perform(post("/api/v1/medicines/" + savedMedicine.getId() + "/reviews")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                //then
                 .andExpect(status().isCreated())
-                .andExpect(header().string(HttpHeaders.LOCATION, "/api/v1/reviews/1"));
+                .andReturn();
 
-        MedicineReview savedReview = medicineReviewRepository.findById(1L).orElseThrow();
+        //then
+        String location = mvcResult.getResponse().getHeader(HttpHeaders.LOCATION);
+        Long reviewId = Long.valueOf(location.substring(location.lastIndexOf("/") + 1));
+
+        MedicineReview savedReview = medicineReviewRepository.findById(reviewId).orElseThrow();
         assertThat(savedReview.getReview()).isEqualTo(request.getReview());
         assertThat(savedReview.getRating()).isEqualTo(request.getRating());
         assertThat(savedReview.getSymptom()).isEqualTo(request.getSymptom());
@@ -387,7 +390,8 @@ class MedicineReviewV1controllerCreateTest extends ControllerTestSupport {
                         .content(objectMapper.writeValueAsString(request)))
                 //then
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Rating must have up to 1 integer digit and 1 fractional digit."));
+                .andExpect(
+                        jsonPath("$.message").value("Rating must have up to 1 integer digit and 1 fractional digit."));
 
         assertThat(medicineReviewRepository.count()).isZero();
     }

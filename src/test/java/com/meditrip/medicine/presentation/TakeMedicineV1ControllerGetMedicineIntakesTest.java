@@ -21,7 +21,7 @@ import com.meditrip.medicine.domain.repository.MedicineRepository;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,8 +50,8 @@ class TakeMedicineV1ControllerGetMedicineIntakesTest extends ControllerTestSuppo
     @Autowired
     private MedicineHashtagsRepository medicineHashtagsRepository;
 
-    @BeforeEach
-    void setUp() {
+    @AfterEach
+    void tearDown() {
         medicineIntakeRepository.deleteAllInBatch();
         medicineHashtagsRepository.deleteAllInBatch();
         medicineIngredientsRepository.deleteAllInBatch();
