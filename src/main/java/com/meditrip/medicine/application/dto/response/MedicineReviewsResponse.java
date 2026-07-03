@@ -1,6 +1,7 @@
 package com.meditrip.medicine.application.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.meditrip.medicine.application.dto.ReviewAuthorInfo;
 import com.meditrip.medicine.domain.entity.MedicineReview;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -28,13 +29,14 @@ public class MedicineReviewsResponse {
 
     private final String review;
 
-    public static MedicineReviewsResponse from(MedicineReview review, String nickname, String userProfileImg, UUID requestUserId) {
+    public static MedicineReviewsResponse from(MedicineReview review, ReviewAuthorInfo reviewAuthorInfo,
+                                               UUID requestUserId) {
         return MedicineReviewsResponse.builder()
                 .id(review.getId())
-                .nickname(nickname)
-                .userProfileImg(userProfileImg)
+                .nickname(reviewAuthorInfo.getNickname())
+                .userProfileImg(reviewAuthorInfo.getProfileImg())
                 .authorGender(review.getGender())
-                .authorAgeGroup(toAgeGroup(review.getAge()))
+                .authorAgeGroup(toAgeGroup(reviewAuthorInfo.getAge()))
                 .authorRegion(review.getCountry())
                 .rating(review.getRating())
                 .createdAt(review.getCreatedAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDate())

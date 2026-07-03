@@ -23,7 +23,7 @@ public class MedicineReviewService {
 
     @Transactional
     public Long create(UserInfo userInfo, Long medicineId, CreateMedicineReviewApplicationRequest request) {
-        MedicineReview review = MedicineReview.create(medicineId, request.getReview(), userInfo.getAge(),
+        MedicineReview review = MedicineReview.create(medicineId, request.getReview(),
                 userInfo.getHeight(),
                 userInfo.getWeight(), request.getRating(), userInfo.getGender(), userInfo.getCountry(),
                 userInfo.getUserId(), request.getSymptom());

@@ -15,7 +15,7 @@ import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.repository.UserRepository;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +35,8 @@ class MedicineReviewV1controllerGetReviewsTest extends ControllerTestSupport {
     @Autowired
     private MedicineReviewRepository medicineReviewRepository;
 
-    @BeforeEach
-    void setUp() {
+    @AfterEach
+    void tearDown() {
         userRepository.deleteAllInBatch();
         medicineRepository.deleteAllInBatch();
         medicineReviewRepository.deleteAllInBatch();
@@ -51,7 +51,7 @@ class MedicineReviewV1controllerGetReviewsTest extends ControllerTestSupport {
     private MedicineReview persistReview(Long medicineId, UUID userId, Double rating, String gender,
                                          String country, String symptom) {
         MedicineReview review = MedicineReview.create(
-                medicineId, "약이 정말 좋네요.", 25, 170.0, 60.0, rating, gender, country, userId, symptom);
+                medicineId, "약이 정말 좋네요.", 170.0, 60.0, rating, gender, country, userId, symptom);
         return medicineReviewRepository.save(review);
     }
 

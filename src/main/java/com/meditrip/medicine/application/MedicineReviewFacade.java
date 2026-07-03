@@ -2,6 +2,7 @@ package com.meditrip.medicine.application;
 
 import com.meditrip.common.domain.UserStatus;
 import com.meditrip.common.response.CursorResponse;
+import com.meditrip.medicine.application.dto.ReviewAuthorInfo;
 import com.meditrip.medicine.application.dto.request.CreateMedicineReviewApplicationRequest;
 import com.meditrip.medicine.application.dto.request.GetMedicineReviewsApplicationRequest;
 import com.meditrip.medicine.application.dto.response.MedicineReviewsResponse;
@@ -83,14 +84,12 @@ public class MedicineReviewFacade {
                 .map(MedicineReview::getUserId)
                 .distinct()
                 .toList();
-        Map<UUID, String> nicknameByUserId = userService.getNicknamesByUserIds(authorIds);
-        Map<UUID, String> profileImgByUserId = userService.getProfileImgsByUserIds(authorIds);
+        Map<UUID, ReviewAuthorInfo> authorInfoByUserIds = userService.getReviewAuthorInfoByUserIds(authorIds);
 
         List<MedicineReviewsResponse> items = pageContent.stream()
                 .map(review -> MedicineReviewsResponse.from(
                         review,
-                        nicknameByUserId.get(review.getUserId()),
-                        profileImgByUserId.get(review.getUserId()),
+                        authorInfoByUserIds.get(review.getUserId()),
                         userId))
                 .toList();
 

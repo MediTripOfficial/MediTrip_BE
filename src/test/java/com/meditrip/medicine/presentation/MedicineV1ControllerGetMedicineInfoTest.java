@@ -29,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.UUID;
 import javax.crypto.SecretKey;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,8 +64,8 @@ class MedicineV1ControllerGetMedicineInfoTest extends ControllerTestSupport {
     @Autowired
     private UserRepository userRepository;
 
-    @BeforeEach
-    void setUp() {
+    @AfterEach
+    void tearDown() {
         medicineHashtagsRepository.deleteAllInBatch();
         medicineIngredientsRepository.deleteAllInBatch();
         medicineReviewRepository.deleteAllInBatch();
@@ -97,7 +97,7 @@ class MedicineV1ControllerGetMedicineInfoTest extends ControllerTestSupport {
 
     private MedicineReview persistReview(Long medicineId, UUID authorId, Double rating) {
         MedicineReview review = MedicineReview.create(
-                medicineId, "약이 정말 좋네요.", 28, 165.0, 55.0, rating, "Female", "KR", authorId, "Headache");
+                medicineId, "약이 정말 좋네요.", 165.0, 55.0, rating, "Female", "KR", authorId, "Headache");
         return medicineReviewRepository.save(review);
     }
 

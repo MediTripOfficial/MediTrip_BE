@@ -66,6 +66,37 @@ public class MedicineResponse {
                 .build();
     }
 
+    public static MedicineResponse of(MedicineInfo medicineInfo) {
+        if (medicineInfo == null) {
+            return MedicineResponse.builder().build();
+        }
+
+        return MedicineResponse.builder()
+                .id(medicineInfo.getId())
+                .name(medicineInfo.getName())
+                .imageUrl(medicineInfo.getImageUrl())
+                .manufacturer(medicineInfo.getManufacturer())
+                .ingredients(medicineInfo.getIngredients() == null
+                        ? null
+                        : medicineInfo.getIngredients().stream()
+                                .map(Ingredient::of)
+                                .toList())
+                .diseaseHashtags(medicineInfo.getDiseaseHashtags())
+                .efficacyHashtags(medicineInfo.getEfficacyHashtags())
+                .isChildSafe(medicineInfo.getIsChildSafe())
+                .isConvenienceStore(medicineInfo.getIsConvenienceStore())
+                .purchaseLocation(medicineInfo.getPurchaseLocation())
+                .dosage(medicineInfo.getDosage())
+                .interval(medicineInfo.getInterval())
+                .maxLimit(medicineInfo.getMaxLimit())
+                .caution(medicineInfo.getCaution())
+                .details(medicineInfo.getDetails())
+                .drugInteractions(medicineInfo.getDrugInteractions())
+                .seeDoctor(medicineInfo.getSeeDoctor())
+                .countryCode(medicineInfo.getCountryCode())
+                .build();
+    }
+
     @Getter
     @Builder
     @AllArgsConstructor
@@ -96,11 +127,11 @@ public class MedicineResponse {
         private final String review;
         private final String profileImg;
 
-        public static Review of(MedicineReview review, String nickname, String profileImg) {
+        public static Review of(MedicineReview review, String nickname, String profileImg, Integer age) {
             return Review.builder()
                     .id(review.getId())
                     .authorGender(review.getGender())
-                    .authorAgeGroup(toAgeGroup(review.getAge()))
+                    .authorAgeGroup(toAgeGroup(age))
                     .authorRegion(review.getCountry())
                     .rating(review.getRating())
                     .createdAt(review.getCreatedAt().atZone(ZoneId.of("Asia/Seoul")).toLocalDate())

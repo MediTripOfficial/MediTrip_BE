@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.meditrip.medicine.domain.entity.MedicineReview;
 import com.meditrip.medicine.domain.repository.MedicineReviewRepository;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +21,13 @@ class MedicineReviewV1controllerDeleteTest extends ControllerTestSupport {
     @Autowired
     private MedicineReviewRepository medicineReviewRepository;
 
-    @BeforeEach
-    void setUp() {
+    @AfterEach
+    void tearDown() {
         medicineReviewRepository.deleteAllInBatch();
     }
 
     private MedicineReview persistReview(UUID authorId) {
-        MedicineReview review = MedicineReview.create(1L, "약이 정말 좋네요.", 25, 170.0, 60.0, 5.0, "Female", "KR", authorId,
+        MedicineReview review = MedicineReview.create(1L, "약이 정말 좋네요.", 170.0, 60.0, 5.0, "Female", "KR", authorId,
                 "Headache");
         return medicineReviewRepository.save(review);
     }

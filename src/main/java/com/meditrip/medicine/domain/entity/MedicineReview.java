@@ -34,7 +34,6 @@ public class MedicineReview extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String review;
 
-    private Integer age; //TODO : 기획팀 답변 받으면 수정
     private Double height;
     private Double weight;
 
@@ -51,12 +50,11 @@ public class MedicineReview extends BaseEntity {
 
     private String symptom; //TODO : 디자인 나오면 수정
 
-    public static MedicineReview create(Long medicineId, String review, Integer age, Double height, Double weight, Double rating,
+    public static MedicineReview create(Long medicineId, String review, Double height, Double weight, Double rating,
                                         String gender, String country, UUID userId, String symptom) {
         return MedicineReview.builder()
                 .medicineId(medicineId)
                 .review(review)
-                .age(age)
                 .height(height)
                 .weight(weight)
                 .rating(rating)
