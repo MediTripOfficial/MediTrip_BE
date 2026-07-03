@@ -1,16 +1,21 @@
 package com.meditrip.medicine.application;
 
+import com.meditrip.medicine.domain.IntakeSortType;
 import com.meditrip.medicine.domain.TakeMedicineCondition;
 import com.meditrip.medicine.domain.entity.MedicineIntake;
 import com.meditrip.medicine.domain.entity.MedicineIntakeLog;
 import com.meditrip.medicine.domain.exception.MedicineIntakeNotFoundException;
 import com.meditrip.medicine.domain.repository.MedicineIntakeLogRepository;
+import com.meditrip.medicine.domain.repository.MedicineIntakeQueryRepository;
 import com.meditrip.medicine.domain.repository.MedicineIntakeRepository;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +27,7 @@ public class TakeMedicineService {
 
     private final MedicineIntakeRepository medicineIntakeRepository;
     private final MedicineIntakeLogRepository medicineIntakeLogRepository;
+    private final MedicineIntakeQueryRepository medicineIntakeQueryRepository;
 
     @Transactional
     public Long take(Long medicineId, UUID userId) {
@@ -36,7 +42,7 @@ public class TakeMedicineService {
     public void applyFollowUp(Long intakeId, UUID userId, TakeMedicineCondition condition) {
         Optional<MedicineIntake> medicineIntakeOptional = medicineIntakeRepository.findById(intakeId);
 
-        if (medicineIntakeOptional.isEmpty()){
+        if (medicineIntakeOptional.isEmpty()) {
             log.info("존재하지 않는 복약 정보 업데이트 요청. User Id : [{}], intakeId : [{}]", userId, intakeId);
             throw new MedicineIntakeNotFoundException();
         }
@@ -60,4 +66,11 @@ public class TakeMedicineService {
         medicineIntakeLogRepository.save(log);
     }
 
+    @Transactional(readOnly = true)
+    public Page<MedicineIntake> findByMedicineIntakesById(UUID userId, PageRequest pageRequest,
+                                                                             LocalDate firstStartDate,
+                                                                             LocalDate firstEndDate, String sortInput) {
+        IntakeSortType sort = IntakeSortType.valueOf(sortInput);
+        return medicineIntakeQueryRepository.findIntakes(userId, firstStartDate, firstEndDate, sort, pageRequest);
+    }
 }

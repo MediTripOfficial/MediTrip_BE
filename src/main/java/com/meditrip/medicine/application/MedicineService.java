@@ -6,6 +6,8 @@ import com.meditrip.medicine.domain.exception.MedicineNotFoundException;
 import com.meditrip.medicine.domain.repository.MedicineQueryRepository;
 import com.meditrip.medicine.domain.repository.MedicineRepository;
 import com.meditrip.medicine.domain.repository.MedicineReviewRepository;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -45,4 +47,8 @@ public class MedicineService {
         return medicineRepository.existsById(medicineId);
     }
 
+    @Transactional(readOnly = true)
+    public Map<Long, MedicineInfo> getMedicineInfoByIds(List<Long> medicineIds) {
+        return medicineQueryRepository.findAllByIds(medicineIds);
+    }
 }
