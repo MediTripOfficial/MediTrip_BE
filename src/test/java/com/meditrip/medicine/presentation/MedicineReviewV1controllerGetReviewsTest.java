@@ -14,6 +14,7 @@ import com.meditrip.medicine.domain.repository.MedicineReviewRepository;
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.repository.UserRepository;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,7 +52,14 @@ class MedicineReviewV1controllerGetReviewsTest extends ControllerTestSupport {
     private MedicineReview persistReview(Long medicineId, UUID userId, Double rating, String gender,
                                          String country, String symptom) {
         MedicineReview review = MedicineReview.create(
-                medicineId, "약이 정말 좋네요.", 170.0, 60.0, rating, gender, country, userId, symptom);
+                medicineId, "약이 정말 좋네요.", 170.0, 60.0, rating, gender, country, userId, symptom, null);
+        return medicineReviewRepository.save(review);
+    }
+
+    private MedicineReview persistReview(Long medicineId, UUID userId, Double rating, String gender,
+                                         String country, String symptom, List<String> images) {
+        MedicineReview review = MedicineReview.create(
+                medicineId, "약이 정말 좋네요.", 170.0, 60.0, rating, gender, country, userId, symptom, images);
         return medicineReviewRepository.save(review);
     }
 
@@ -69,7 +77,7 @@ class MedicineReviewV1controllerGetReviewsTest extends ControllerTestSupport {
 
         Medicine medicine = persistMedicine();
         MedicineReview review = persistReview(
-                medicine.getId(), authorId, 5.0, "Female", "KR", "Headache");
+                medicine.getId(), authorId, 5.0, "Female", "KR", "Headache", List.of("https://www.s3.com/123"));
 
         String accessToken = jwtProvider.generateAccessToken(requestUserId.toString());
 
@@ -94,6 +102,7 @@ class MedicineReviewV1controllerGetReviewsTest extends ControllerTestSupport {
         assertThat(item.get("symptoms").get(0).asText()).isEqualTo("Headache");
         assertThat(item.get("isAuthor").asBoolean()).isFalse();
         assertThat(item.get("review").asText()).isEqualTo("약이 정말 좋네요.");
+        assertThat(item.get("images").get(0).asText()).isEqualTo("https://www.s3.com/123");
         assertThat(root.get("hasNext").asBoolean()).isFalse();
         assertThat(root.get("nextCursor").isNull()).isTrue();
     }
@@ -226,8 +235,9 @@ class MedicineReviewV1controllerGetReviewsTest extends ControllerTestSupport {
         String accessToken = jwtProvider.generateAccessToken(userId.toString());
 
         //when
-        MvcResult mvcResult = mockMvc.perform(get("/api/v1/medicines/" + medicine.getId() + "/reviews" + "?sort=HIGHEST_RATING")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+        MvcResult mvcResult = mockMvc.perform(
+                        get("/api/v1/medicines/" + medicine.getId() + "/reviews" + "?sort=HIGHEST_RATING")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 //then
                 .andExpect(status().isOk())
                 .andReturn();
@@ -255,8 +265,9 @@ class MedicineReviewV1controllerGetReviewsTest extends ControllerTestSupport {
         String accessToken = jwtProvider.generateAccessToken(userId.toString());
 
         //when
-        MvcResult mvcResult = mockMvc.perform(get("/api/v1/medicines/" + medicine.getId() + "/reviews" + "?sort=LOWEST_RATING")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+        MvcResult mvcResult = mockMvc.perform(
+                        get("/api/v1/medicines/" + medicine.getId() + "/reviews" + "?sort=LOWEST_RATING")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 //then
                 .andExpect(status().isOk())
                 .andReturn();
@@ -313,8 +324,9 @@ class MedicineReviewV1controllerGetReviewsTest extends ControllerTestSupport {
         String accessToken = jwtProvider.generateAccessToken(userId.toString());
 
         //when
-        MvcResult mvcResult = mockMvc.perform(get("/api/v1/medicines/" + medicine.getId() + "/reviews"+ "?gender=Female")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+        MvcResult mvcResult = mockMvc.perform(
+                        get("/api/v1/medicines/" + medicine.getId() + "/reviews" + "?gender=Female")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 //then
                 .andExpect(status().isOk())
                 .andReturn();
@@ -342,8 +354,9 @@ class MedicineReviewV1controllerGetReviewsTest extends ControllerTestSupport {
         String accessToken = jwtProvider.generateAccessToken(userId.toString());
 
         //when
-        MvcResult mvcResult = mockMvc.perform(get("/api/v1/medicines/" + medicine.getId() + "/reviews"+ "?countries=KR")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+        MvcResult mvcResult = mockMvc.perform(
+                        get("/api/v1/medicines/" + medicine.getId() + "/reviews" + "?countries=KR")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 //then
                 .andExpect(status().isOk())
                 .andReturn();
@@ -371,8 +384,9 @@ class MedicineReviewV1controllerGetReviewsTest extends ControllerTestSupport {
         String accessToken = jwtProvider.generateAccessToken(userId.toString());
 
         //when
-        MvcResult mvcResult = mockMvc.perform(get("/api/v1/medicines/" + medicine.getId() + "/reviews" + "?symptoms=Headache")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
+        MvcResult mvcResult = mockMvc.perform(
+                        get("/api/v1/medicines/" + medicine.getId() + "/reviews" + "?symptoms=Headache")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken))
                 //then
                 .andExpect(status().isOk())
                 .andReturn();
