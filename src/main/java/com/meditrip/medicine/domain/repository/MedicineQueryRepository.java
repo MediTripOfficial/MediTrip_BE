@@ -136,7 +136,7 @@ public class MedicineQueryRepository {
                 ));
     }
 
-    private Map<Long, List<String>> fetchHashtagsGrouped(List<Long> medicineIds, HashtagType type) {
+    public Map<Long, List<String>> fetchHashtagsGrouped(List<Long> medicineIds, HashtagType type) {
         return queryFactory
                 .select(QMedicineHashtags.medicineHashtags.medicineId, QHashtag.hashtag.name)
                 .from(QMedicineHashtags.medicineHashtags)
