@@ -6,6 +6,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,11 +27,14 @@ public class CreateMedicineReviewRequest {
     @Digits(integer = 1, fraction = 1, message = "Rating must have up to 1 integer digit and 1 fractional digit.")
     private Double rating;
 
+    private List<String> images;
+
     public CreateMedicineReviewApplicationRequest toApplicationRequest(){
         return CreateMedicineReviewApplicationRequest.builder()
                 .symptom(this.symptom)
                 .review(this.review)
                 .rating(this.rating)
+                .images(this.images)
                 .build();
     }
 

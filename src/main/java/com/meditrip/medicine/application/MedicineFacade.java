@@ -1,14 +1,18 @@
 package com.meditrip.medicine.application;
 
 import com.meditrip.medicine.application.dto.MedicineInfo;
+import com.meditrip.medicine.application.dto.response.MedicineHistoryResponse;
 import com.meditrip.medicine.application.dto.response.MedicineResponse;
 import com.meditrip.medicine.domain.UserInfo;
 import com.meditrip.medicine.domain.entity.MedicineReview;
 import com.meditrip.user.application.UserService;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -47,6 +51,12 @@ public class MedicineFacade {
         Integer age = userInfo == null ? null : userInfo.getAge();
 
         return MedicineResponse.Review.of(topReview, nickname, profileImg, age);
+    }
+
+    public Page<MedicineHistoryResponse> getMedicineHistories(UUID userId, int page, int size,
+                                                              LocalDate startDate, LocalDate endDate) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        return medicineService.findByMedicineHistoriesByUserId(userId, startDate, endDate, pageRequest);
     }
 
 }

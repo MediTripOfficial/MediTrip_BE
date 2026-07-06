@@ -51,7 +51,7 @@ class MedicineReviewFacadeGetReviewsTest {
 
     private static MedicineReview review(Long id, UUID userId) {
         MedicineReview review = MedicineReview.create(
-                1L, "약이 정말 좋네요.", 170.0, 60.0, 5.0, "Female", "KR", userId, "Headache");
+                1L, "약이 정말 좋네요.", 170.0, 60.0, 5.0, "Female", "KR", userId, "Headache", null);
         ReflectionTestUtils.setField(review, "id", id);
         ReflectionTestUtils.setField(review, "createdAt", Instant.now());
         return review;
