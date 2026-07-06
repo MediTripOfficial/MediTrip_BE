@@ -26,7 +26,7 @@ public class MedicineReviewService {
         MedicineReview review = MedicineReview.create(medicineId, request.getReview(),
                 userInfo.getHeight(),
                 userInfo.getWeight(), request.getRating(), userInfo.getGender(), userInfo.getCountry(),
-                userInfo.getUserId(), request.getSymptom());
+                userInfo.getUserId(), request.getSymptom(), request.getImages());
 
         MedicineReview saved = medicineReviewRepository.save(review);
         return saved.getId();

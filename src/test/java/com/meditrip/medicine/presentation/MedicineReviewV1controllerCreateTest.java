@@ -13,6 +13,7 @@ import com.meditrip.medicine.domain.repository.MedicineReviewRepository;
 import com.meditrip.medicine.presentation.dto.request.CreateMedicineReviewRequest;
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.repository.UserRepository;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -63,6 +64,7 @@ class MedicineReviewV1controllerCreateTest extends ControllerTestSupport {
                 .symptom("Symptom")
                 .review("약이 정말 좋네요.")
                 .rating(5.0)
+                .images(List.of("https://www.s3.com/review1234"))
                 .build();
 
         String accessToken = jwtProvider.generateAccessToken(userId.toString());
@@ -88,6 +90,7 @@ class MedicineReviewV1controllerCreateTest extends ControllerTestSupport {
         assertThat(savedReview.getWeight()).isEqualTo(user.getWeight());
         assertThat(savedReview.getCountry()).isEqualTo(user.getCountry());
         assertThat(savedReview.getIsDeleted()).isFalse();
+        assertThat(savedReview.getImages()).contains("https://www.s3.com/review1234");
     }
 
     @DisplayName("약 리뷰를 생성 할 유저 정보가 없으면 404를 반환하고, 약 리뷰 생성에 실패한다.")
