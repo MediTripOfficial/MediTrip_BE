@@ -28,6 +28,7 @@ public class MedicineReviewsResponse {
     private final boolean isAuthor;
 
     private final String review;
+    private final List<String> images;
 
     public static MedicineReviewsResponse from(MedicineReview review, ReviewAuthorInfo reviewAuthorInfo,
                                                UUID requestUserId) {
@@ -43,6 +44,7 @@ public class MedicineReviewsResponse {
                 .symptoms(toSymptomList(review.getSymptom()))
                 .isAuthor(review.getUserId().equals(requestUserId))
                 .review(review.getReview())
+                .images(review.getImages())
                 .build();
     }
 
