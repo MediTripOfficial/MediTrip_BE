@@ -125,6 +125,9 @@ jobs:
             EMAIL_GOOGLE_PASSWORD=${{ secrets.EMAIL_GOOGLE_PASSWORD }}
             GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_KEY }}
             PHARMACY_API_KEY=${{ secrets.PHARMACY_API_KEY }}
+            S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
+            CDN_DOMAIN=${{ secrets.CDN_DOMAIN }}
+            S3_REGION=${{ secrets.S3_REGION }}
             EOF
 
             # 최신 이미지 pull
