@@ -77,3 +77,6 @@ cloud:
       bucket: ${S3_BUCKET_NAME}
       cdn-domain: ${CDN_DOMAIN}
     region: ${S3_REGION}
+
+server:
+  forward-headers-strategy: framework
