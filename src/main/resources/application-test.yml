@@ -40,3 +40,11 @@ pharmacy:
   api:
     key: test-dummy-key
     url: http://test
+
+
+cloud:
+  aws:
+    s3:
+      bucket: s3-bucket
+      cdn-domain: cdn-domain
+    region: region
