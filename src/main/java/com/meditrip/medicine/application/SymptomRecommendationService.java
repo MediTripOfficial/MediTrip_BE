@@ -16,7 +16,6 @@ import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.repository.UserAllergyRepository;
 import com.meditrip.user.domain.repository.UserConditionRepository;
 import com.meditrip.user.domain.repository.UserRepository;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -104,7 +103,7 @@ public class SymptomRecommendationService {
         return SymptomResponse.builder()
                 .name(symptomCode.getMajorNameEn())
                 .description(symptomCode.getSubNameEn())
-                .hashtag(new ArrayList<>()) //TODO : 기획팀 답변 받은 후 수정
+                .hashtag(symptomCode.getHashtags())
                 .similarDrugs(similarDrugs)
                 .medicines(medicineResponses)
                 .build();

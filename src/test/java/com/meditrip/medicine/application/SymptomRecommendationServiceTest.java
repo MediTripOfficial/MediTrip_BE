@@ -108,7 +108,7 @@ class SymptomRecommendationServiceTest {
     }
 
     @Test
-    @DisplayName("매칭되는 약이 하나도 없으면 hashtag/similarDrugs/medicines가 전부 빈 배열로 내려간다")
+    @DisplayName("매칭되는 약이 하나도 없으면 similarDrugs/medicines가 전부 빈 배열로 내려간다")
     void recommend_returnsEmptyArrays_whenNoMedicinesMatchSymptomCode() {
         //given
         UUID userId = UUID.randomUUID();
@@ -130,7 +130,6 @@ class SymptomRecommendationServiceTest {
 
         //then
         SymptomResponse primary = response.getResult().getPrimarySymptom();
-        assertThat(primary.getHashtag()).isEmpty();
         assertThat(primary.getSimilarDrugs()).isEmpty();
         assertThat(primary.getMedicines()).isEmpty();
         assertThat(response.getResult().getSecondarySymptom()).isNull();
