@@ -30,8 +30,8 @@ public class MapFacade {
     private static final String LANG_KO = "ko";
     private static final String LANG_EN = "en";
 
-    private static final BigDecimal DEFAULT_LATITUDE = new BigDecimal("37.5546");   // 서울역, TODO: 기본 위치 정해지면 변경
-    private static final BigDecimal DEFAULT_LONGITUDE = new BigDecimal("126.9706");
+    private static final BigDecimal DEFAULT_LATITUDE = new BigDecimal("37.5716288");   // 광화문역
+    private static final BigDecimal DEFAULT_LONGITUDE = new BigDecimal("126.9764566");
 
     private final HaversineSpatialService haversineSpatialService;
     private final GoogleSearchApi googleSearchApi;
