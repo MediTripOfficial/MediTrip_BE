@@ -212,7 +212,9 @@ class SymptomRecommendationV1ControllerTest extends ControllerTestSupport {
 
         assertThat(primary.get("name").asText()).isEqualTo("Fever, Pain & Inflammation");
         assertThat(primary.get("description").asText()).isEqualTo("General & Internal Pain");
-//        assertThat(primary.get("hashtag").get(0).asText()).isEqualTo("Headache");
+        assertThat(primary.get("hashtag").get(0).asText()).isEqualTo("Headache");
+        assertThat(primary.get("hashtag").get(1).asText()).isEqualTo("Period Pain");
+        assertThat(primary.get("hashtag").get(2).asText()).isEqualTo("Fever");
 
         JsonNode medicineSummary = primary.get("medicines").get(0);
         assertThat(medicineSummary.get("productNameEng").asText()).isEqualTo("Tylenol");
