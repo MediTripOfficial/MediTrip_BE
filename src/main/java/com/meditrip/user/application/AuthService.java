@@ -38,7 +38,7 @@ public class AuthService {
     private final UserAllergyRepository userAllergyRepository;
 
     @Transactional
-    public UUID signup(SignupApplicationRequest request) {
+    public User signup(SignupApplicationRequest request) {
         UUID userId = UUID.randomUUID();
         log.info("회원가입을 진행합니다. id : {}", userId);
 
@@ -55,7 +55,7 @@ public class AuthService {
         saveConditions(request.getUnderlyingDisease(), userId);
         saveAllergies(request.getAllergies(), userId);
 
-        return saved.getId();
+        return saved;
     }
 
     private void validSignUp(SignupApplicationRequest request) {

@@ -222,4 +222,8 @@ public class User extends BaseEntity {
         return Period.between(birth, LocalDate.now()).getYears();
     }
 
+    public UserRole getUserRole() {
+        return userRole == null ? UserRole.USER : userRole;
+    }
+
 }
