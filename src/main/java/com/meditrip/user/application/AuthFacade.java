@@ -84,7 +84,7 @@ public class AuthFacade {
             throw new JwtAuthenticationException("Invalid refresh token.");
         }
 
-        String newAccessToken = jwtProvider.generateAccessToken(userIdStr);
+        String newAccessToken = jwtProvider.generateAccessToken(userIdStr, user.getUserRole());
         String newRefreshToken = jwtProvider.generateRefreshToken(userIdStr);
 
         tokenService.saveRefreshToken(userId, newRefreshToken);
