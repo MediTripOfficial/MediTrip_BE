@@ -1,7 +1,10 @@
 package com.meditrip.common.event;
 
+import com.meditrip.common.domain.UserRole;
 import com.meditrip.config.oauth.user.OAuth2Provider;
+import lombok.Getter;
 
+@Getter
 public class OAuth2LoginRequestEvent {
 
     private final String email;
@@ -11,6 +14,7 @@ public class OAuth2LoginRequestEvent {
     private String userStatus;
     private boolean handled = false;
     private String failureReason;
+    private UserRole userRole;
 
     public OAuth2LoginRequestEvent(String email, String name, OAuth2Provider provider) {
         this.email = email;
@@ -18,22 +22,11 @@ public class OAuth2LoginRequestEvent {
         this.provider = provider;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public OAuth2Provider getProvider() {
-        return provider;
-    }
-
-    public void setResult(String userId, String userStatus) {
+    public void setResult(String userId, String userStatus, UserRole userRole) {
         this.userId = userId;
         this.userStatus = userStatus;
         this.handled = true;
+        this.userRole = userRole;
     }
 
     public void setFailure(String failureReason) {
@@ -41,19 +34,4 @@ public class OAuth2LoginRequestEvent {
         this.handled = false;
     }
 
-    public String getFailureReason() {
-        return failureReason;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public String getUserStatus() {
-        return userStatus;
-    }
-
-    public boolean isHandled() {
-        return handled;
-    }
 }

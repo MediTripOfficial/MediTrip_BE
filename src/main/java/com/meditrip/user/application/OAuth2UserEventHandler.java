@@ -45,7 +45,7 @@ public class OAuth2UserEventHandler {
         }
 
         log.info("소셜 로그인 기존 유저. email: [{}]", maskedEmail);
-        event.setResult(user.getId().toString(), status.name());
+        event.setResult(user.getId().toString(), status.name(), user.getUserRole());
     }
 
     private void handleNewUser(OAuth2LoginRequestEvent event, String maskedEmail) {
@@ -59,7 +59,7 @@ public class OAuth2UserEventHandler {
                 provider
         );
         userRepository.save(newUser);
-        event.setResult(userId.toString(), newUser.getStatus().name());
+        event.setResult(userId.toString(), newUser.getStatus().name(), newUser.getUserRole());
     }
 
     @EventListener
