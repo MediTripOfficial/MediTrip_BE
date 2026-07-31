@@ -30,12 +30,12 @@ public class AuthFacade {
 
         validEmailVerificationToken(verifiedToken, email, request.getVerifiedToken());
 
-        UUID userId = authService.signup(request);
+        User user = authService.signup(request);
 
-        String accessToken = jwtProvider.generateAccessToken(userId.toString());
-        String refreshToken = jwtProvider.generateRefreshToken(userId.toString());
+        String accessToken = jwtProvider.generateAccessToken(user.getId().toString(), user.getUserRole());
+        String refreshToken = jwtProvider.generateRefreshToken(user.getId().toString());
 
-        tokenService.saveRefreshToken(userId, refreshToken);
+        tokenService.saveRefreshToken(user.getId(), refreshToken);
 
         emailAuthCodeStore.deleteVerifiedTokenByEmail(email);
 
@@ -53,7 +53,7 @@ public class AuthFacade {
         user.validateStatusForLogin();
         authService.verifyPasswordForLogin(request.getPassword(), user.getPassword());
 
-        String accessToken = jwtProvider.generateAccessToken(user.getId().toString());
+        String accessToken = jwtProvider.generateAccessToken(user.getId().toString(), user.getUserRole());
         String refreshToken = jwtProvider.generateRefreshToken(user.getId().toString());
 
         tokenService.saveRefreshToken(user.getId(), refreshToken);
@@ -84,7 +84,7 @@ public class AuthFacade {
             throw new JwtAuthenticationException("Invalid refresh token.");
         }
 
-        String newAccessToken = jwtProvider.generateAccessToken(userIdStr);
+        String newAccessToken = jwtProvider.generateAccessToken(userIdStr, user.getUserRole());
         String newRefreshToken = jwtProvider.generateRefreshToken(userIdStr);
 
         tokenService.saveRefreshToken(userId, newRefreshToken);

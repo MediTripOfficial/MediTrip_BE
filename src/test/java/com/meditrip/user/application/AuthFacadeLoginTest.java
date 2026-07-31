@@ -2,6 +2,7 @@ package com.meditrip.user.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
@@ -53,7 +54,7 @@ class AuthFacadeLoginTest {
         given(user.getId()).willReturn(userId);
         given(user.getPassword()).willReturn("storedPassword");
         given(userService.findLoginUserByEmail(eq("로그인"), eq(email))).willReturn(user);
-        given(jwtProvider.generateAccessToken(eq(userId.toString()))).willReturn(accessToken);
+        given(jwtProvider.generateAccessToken(eq(userId.toString()), any())).willReturn(accessToken);
         given(jwtProvider.generateRefreshToken(eq(userId.toString()))).willReturn(refreshToken);
 
         LoginApplicationRequest request = LoginApplicationRequest.builder()

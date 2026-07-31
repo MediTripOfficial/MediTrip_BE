@@ -1,6 +1,7 @@
 package com.meditrip.user.domain.entity;
 
 import com.meditrip.common.domain.BaseEntity;
+import com.meditrip.common.domain.UserRole;
 import com.meditrip.common.domain.UserStatus;
 import com.meditrip.common.exception.NotFoundException;
 import com.meditrip.user.domain.entity.enums.Gender;
@@ -63,6 +64,9 @@ public class User extends BaseEntity {
     private Boolean isMarketingTermsAgreed;
     private String profileImg;
 
+    @Enumerated(EnumType.STRING)
+    private UserRole userRole;
+
     private static final String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,20}$";
 
     public static User createLocalUser(UUID id, String email, String encodedPassword, String password, String name,
@@ -89,6 +93,7 @@ public class User extends BaseEntity {
                 .provider(Provider.LOCAL)
                 .status(UserStatus.ACTIVE)
                 .profileImg(profileImg)
+                .userRole(UserRole.USER)
                 .build();
     }
 
@@ -98,6 +103,7 @@ public class User extends BaseEntity {
                 .email(email)
                 .name(name)
                 .provider(provider)
+                .userRole(UserRole.USER)
                 .status(UserStatus.GUEST)
                 .isMarketingTermsAgreed(false)
                 .build();
@@ -214,6 +220,10 @@ public class User extends BaseEntity {
         }
 
         return Period.between(birth, LocalDate.now()).getYears();
+    }
+
+    public UserRole getUserRole() {
+        return userRole == null ? UserRole.USER : userRole;
     }
 
 }

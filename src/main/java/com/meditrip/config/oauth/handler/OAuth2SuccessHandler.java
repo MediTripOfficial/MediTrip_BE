@@ -1,5 +1,6 @@
 package com.meditrip.config.oauth.handler;
 
+import com.meditrip.common.domain.UserRole;
 import com.meditrip.common.event.OAuth2LoginRequestEvent;
 import com.meditrip.common.event.OAuth2SaveTokenEvent;
 import com.meditrip.common.event.OAuth2UnlinkRequestEvent;
@@ -90,6 +91,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         String userId = loginEvent.getUserId();
         String userStatus = loginEvent.getUserStatus();
+        UserRole userRole = loginEvent.getUserRole();
 
         String accessToken = jwtProvider.generateAccessToken(userId);
         String refreshToken = jwtProvider.generateRefreshToken(userId);

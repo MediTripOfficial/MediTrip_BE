@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.meditrip.common.domain.UserRole;
 import com.meditrip.common.jwt.JwtProperties;
 import com.meditrip.common.jwt.JwtProvider;
 import com.meditrip.user.application.TokenService;
@@ -48,6 +49,7 @@ class AuthV1ControllerRefreshTokenTest extends ControllerTestSupport {
 
         User mockUser = mock(User.class);
         given(userService.findById(userId, "토큰 재발급")).willReturn(mockUser);
+        given(mockUser.getUserRole()).willReturn(UserRole.USER);
         given(tokenService.getRefreshToken(userId)).willReturn(originalRefreshToken);
 
         //when, then

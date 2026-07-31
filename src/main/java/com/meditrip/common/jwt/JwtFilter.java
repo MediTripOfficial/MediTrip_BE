@@ -1,6 +1,7 @@
 package com.meditrip.common.jwt;
 
 import com.meditrip.common.constant.PublicPaths;
+import com.meditrip.common.domain.UserRole;
 import com.meditrip.common.exception.JwtAuthenticationException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -31,7 +32,8 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             if (token != null && jwtProvider.validateAccessToken(token)) {
                 String userId = jwtProvider.getUserId(token);
-                CustomUserDetails userDetails = new CustomUserDetails(userId);
+                UserRole role = jwtProvider.getUserRole(token);
+                CustomUserDetails userDetails = new CustomUserDetails(userId, role);
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);

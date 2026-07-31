@@ -1,5 +1,6 @@
 package com.meditrip.common.jwt;
 
+import com.meditrip.common.domain.UserRole;
 import com.meditrip.common.exception.JwtAuthenticationException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -16,15 +17,22 @@ public class JwtProvider {
 
     private final JwtProperties jwtProperties;
 
+    private static final String ROLE_CLAIM = "role";
+
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(jwtProperties.secret().getBytes(StandardCharsets.UTF_8));
     }
 
     public String generateAccessToken(String userId) {
+        return generateAccessToken(userId, UserRole.USER);
+    }
+
+    public String generateAccessToken(String userId, UserRole role) {
         return Jwts.builder()
                 .subject(String.valueOf(userId))
                 .issuedAt(new Date())
                 .claim(jwtProperties.tokenTypeClaim(), jwtProperties.accessTokenType())
+                .claim(ROLE_CLAIM, role.name())
                 .expiration(new Date(System.currentTimeMillis() + jwtProperties.accessTokenExpiration()))
                 .signWith(getSigningKey())
                 .compact();
@@ -47,6 +55,17 @@ public class JwtProvider {
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+    }
+
+    public UserRole getUserRole(String token) {
+        String role = Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get(ROLE_CLAIM, String.class);
+
+        return UserRole.valueOf(role);
     }
 
     public boolean validateAccessToken(String token) {

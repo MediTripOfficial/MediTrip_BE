@@ -58,7 +58,7 @@ class AuthFacadeRefreshTokenTest {
         given(jwtProvider.getUserId(eq(clientRefreshToken))).willReturn(userIdStr);
         given(tokenService.getRefreshToken(any(UUID.class))).willReturn(clientRefreshToken);
 
-        given(jwtProvider.generateAccessToken(eq(userIdStr))).willReturn(expectedAccessToken);
+        given(jwtProvider.generateAccessToken(eq(userIdStr), any())).willReturn(expectedAccessToken);
         given(jwtProvider.generateRefreshToken(eq(userIdStr))).willReturn(expectedRefreshToken);
 
         //when
