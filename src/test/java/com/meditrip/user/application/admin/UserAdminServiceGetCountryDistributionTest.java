@@ -2,6 +2,7 @@ package com.meditrip.user.application.admin;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,7 +31,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
 @ExtendWith(MockitoExtension.class)
-class UserAdminServiceGetSignupStatisticsTest {
+class UserAdminServiceGetCountryDistributionTest {
 
     @InjectMocks
     private UserAdminService userAdminService;
@@ -38,29 +39,32 @@ class UserAdminServiceGetSignupStatisticsTest {
     @Mock
     private UserRepository userRepository;
 
-    @DisplayName("회원가입 유저를 조회할 수 있다.")
+    @DisplayName("국가별 유저를 조회할 수 있다.")
     @Test
-    void shouldRetrieveRegisteredUsers() {
+    void shouldRetrieveRegisteredUsers_byCountry() {
         //given
         LocalDate start = LocalDate.now().minusDays(10);
         LocalDate end = LocalDate.now().minusDays(1);
         UUID userId = UUID.randomUUID();
         int size = 9;
         int page = 0;
+        String country = "KR";
 
         User mockUser = getUser(UUID.randomUUID(), UserStatus.ACTIVE);
 
-        given(userRepository.findByCreatedAtBetweenAndUserRoleNot(any(), any(), any(), any()))
+        given(userRepository.findByCountryAndCreatedAtBetweenAndUserRoleNot(eq(country), any(), any(), any(), any()))
                 .willReturn(new PageImpl<>(List.of(mockUser)));
 
         //when
-        Page<AdminUserSummaryResponse> response = userAdminService.getSignupStatistics(start, end, userId, size, page);
+        Page<AdminUserSummaryResponse> response = userAdminService.getCountryDistribution(start, end, country, userId,
+                size, page);
 
         //then
         assertThat(response.getTotalPages()).isEqualTo(1);
         assertThat(response.getContent().get(0).getUserId()).isEqualTo(mockUser.getId());
 
-        verify(userRepository, times(1)).findByCreatedAtBetweenAndUserRoleNot(
+        verify(userRepository, times(1)).findByCountryAndCreatedAtBetweenAndUserRoleNot(
+                country,
                 start.atStartOfDay(ZoneId.of("Asia/Seoul")).toInstant(),
                 end.plusDays(1).atStartOfDay(ZoneId.of("Asia/Seoul")).toInstant(),
                 UserRole.ADMIN,
@@ -76,20 +80,23 @@ class UserAdminServiceGetSignupStatisticsTest {
         UUID userId = UUID.randomUUID();
         int size = 9;
         int page = -1;
+        String country = "KR";
 
         User mockUser = getUser(UUID.randomUUID(), UserStatus.ACTIVE);
 
-        given(userRepository.findByCreatedAtBetweenAndUserRoleNot(any(), any(), any(), any()))
+        given(userRepository.findByCountryAndCreatedAtBetweenAndUserRoleNot(eq(country), any(), any(), any(), any()))
                 .willReturn(new PageImpl<>(List.of(mockUser)));
 
         //when
-        Page<AdminUserSummaryResponse> response = userAdminService.getSignupStatistics(start, end, userId, size, page);
+        Page<AdminUserSummaryResponse> response = userAdminService.getCountryDistribution(start, end, country, userId,
+                size, page);
 
         //then
         assertThat(response.getTotalPages()).isEqualTo(1);
         assertThat(response.getContent().get(0).getUserId()).isEqualTo(mockUser.getId());
 
-        verify(userRepository, times(1)).findByCreatedAtBetweenAndUserRoleNot(
+        verify(userRepository, times(1)).findByCountryAndCreatedAtBetweenAndUserRoleNot(
+                country,
                 start.atStartOfDay(ZoneId.of("Asia/Seoul")).toInstant(),
                 end.plusDays(1).atStartOfDay(ZoneId.of("Asia/Seoul")).toInstant(),
                 UserRole.ADMIN,

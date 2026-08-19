@@ -8,7 +8,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class SignupStatisticsResponse {
+public class AdminUserSummaryResponse {
 
     private final UUID userId;
     private final String email;

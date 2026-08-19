@@ -28,6 +28,10 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     Page<User> findByCreatedAtBetween(Instant startInstant, Instant endInstant, Pageable pageable);
 
-    Page<User> findByCreatedAtBetweenAndUserRoleNot(Instant createdAtAfter, Instant createdAtBefore, UserRole userRole, Pageable pageable);
+    Page<User> findByCreatedAtBetweenAndUserRoleNot(Instant createdAtAfter, Instant createdAtBefore, UserRole userRole,
+                                                    Pageable pageable);
+
+    Page<User> findByCountryAndCreatedAtBetweenAndUserRoleNot(String country, Instant startInstant, Instant endInstant,
+                                                              UserRole userRole, Pageable pageable);
 
 }

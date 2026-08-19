@@ -1,7 +1,7 @@
 package com.meditrip.user.application.admin;
 
 import com.meditrip.common.domain.UserRole;
-import com.meditrip.user.application.admin.dto.response.SignupStatisticsResponse;
+import com.meditrip.user.application.admin.dto.response.AdminUserSummaryResponse;
 import com.meditrip.user.domain.entity.User;
 import com.meditrip.user.domain.repository.UserRepository;
 import java.time.Instant;
@@ -27,7 +27,7 @@ public class UserAdminService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public Page<SignupStatisticsResponse> getSignupStatistics(LocalDate start, LocalDate end, UUID userId,
+    public Page<AdminUserSummaryResponse> getSignupStatistics(LocalDate start, LocalDate end, UUID userId,
                                                               int size, int page) {
         log.info("관리자([{}])가 회원가입 유저 조회.", userId);
 
@@ -35,9 +35,26 @@ public class UserAdminService {
         Instant startInstant = toStartOfDayInstant(start);
         Instant endInstant = toStartOfDayInstant(end.plusDays(1));
 
-        Page<User> users = userRepository.findByCreatedAtBetweenAndUserRoleNot(startInstant, endInstant, UserRole.ADMIN, pageRequest);
+        Page<User> users = userRepository.findByCreatedAtBetweenAndUserRoleNot(startInstant, endInstant, UserRole.ADMIN,
+                pageRequest);
 
-        List<SignupStatisticsResponse> response = users.stream().map(this::toSignupStatisticsResponse).toList();
+        List<AdminUserSummaryResponse> response = users.stream().map(this::toSignupStatisticsResponse).toList();
+
+        return new PageImpl<>(response, users.getPageable(), users.getTotalElements());
+    }
+
+    public Page<AdminUserSummaryResponse> getCountryDistribution(LocalDate start, LocalDate end, String country,
+                                                                 UUID userId, int size, int page) {
+        log.info("관리자([{}])가 국가별 유저 조회.", userId);
+
+        PageRequest pageRequest = createPageRequest(page, size);
+        Instant startInstant = toStartOfDayInstant(start);
+        Instant endInstant = toStartOfDayInstant(end.plusDays(1));
+
+        Page<User> users = userRepository.findByCountryAndCreatedAtBetweenAndUserRoleNot(country, startInstant,
+                endInstant, UserRole.ADMIN, pageRequest);
+
+        List<AdminUserSummaryResponse> response = users.stream().map(this::toSignupStatisticsResponse).toList();
 
         return new PageImpl<>(response, users.getPageable(), users.getTotalElements());
     }
@@ -51,8 +68,8 @@ public class UserAdminService {
         return date.atStartOfDay(ZoneId.of("Asia/Seoul")).toInstant();
     }
 
-    private SignupStatisticsResponse toSignupStatisticsResponse(User u) {
-        return SignupStatisticsResponse.builder()
+    private AdminUserSummaryResponse toSignupStatisticsResponse(User u) {
+        return AdminUserSummaryResponse.builder()
                 .userId(u.getId())
                 .email(u.getEmail())
                 .name(u.getName())
